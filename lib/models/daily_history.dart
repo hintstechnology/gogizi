@@ -89,26 +89,35 @@ class DailyHistory {
   // Dummy data
   static List<DailyHistory> get dummyHistory {
     final now = DateTime.now();
+    // Gunakan tanggal tetap untuk demo sesuai permintaan user
+    // Asumsi tahun adalah tahun saat ini atau tahun depan jika bulan sudah lewat
+    final year = now.year; 
+    
+    // 25 Desember - Bakso
+    final date1 = DateTime(year, 12, 25);
+    // 26 Desember - Seblak
+    final date2 = DateTime(year, 12, 26);
+
     return [
       DailyHistory(
         id: 'hist_001',
-        date: now.subtract(const Duration(days: 2)),
+        date: date1,
         scanResults: [
           ScanResult(
             id: 'scan_001',
-            label: 'Nasi Goreng',
-            confidence: 0.92,
+            label: 'Bakso',
+            confidence: 0.95,
             category: FoodCategory.food,
             nutritionalInfo: NutritionalInfo(
-              calories: 350,
-              protein: 12,
-              carbs: 45,
-              fat: 15,
-              sugar: 3,
-              fiber: 2,
-              sodium: 800,
+              calories: 320,
+              protein: 18,
+              carbs: 40,
+              fat: 10,
+              sugar: 2,
+              fiber: 1,
+              sodium: 900,
             ),
-            scannedAt: now.subtract(const Duration(days: 2, hours: 12)),
+            scannedAt: DateTime(year, 12, 25, 12, 30),
             isSweetDrink: false,
           ),
           ScanResult(
@@ -125,36 +134,36 @@ class DailyHistory {
               fiber: 0,
               sodium: 10,
             ),
-            scannedAt: now.subtract(const Duration(days: 2, hours: 13)),
+            scannedAt: DateTime(year, 12, 25, 13, 00),
             isSweetDrink: true,
           ),
         ],
-        totalCalories: 470,
-        totalProtein: 12,
-        totalCarbs: 75,
-        totalFat: 15,
-        totalSugar: 31,
+        totalCalories: 440,
+        totalProtein: 18,
+        totalCarbs: 70,
+        totalFat: 10,
+        totalSugar: 30,
         sweetDrinkCount: 1,
       ),
       DailyHistory(
         id: 'hist_002',
-        date: now.subtract(const Duration(days: 1)),
+        date: date2,
         scanResults: [
           ScanResult(
             id: 'scan_003',
-            label: 'Gado-gado',
-            confidence: 0.95,
+            label: 'Seblak',
+            confidence: 0.90,
             category: FoodCategory.food,
             nutritionalInfo: NutritionalInfo(
-              calories: 280,
-              protein: 15,
-              carbs: 30,
-              fat: 12,
-              sugar: 5,
-              fiber: 8,
-              sodium: 600,
+              calories: 450,
+              protein: 8,
+              carbs: 60,
+              fat: 20,
+              sugar: 4,
+              fiber: 2,
+              sodium: 1200,
             ),
-            scannedAt: now.subtract(const Duration(days: 1, hours: 12)),
+            scannedAt: DateTime(year, 12, 26, 17, 15),
             isSweetDrink: false,
           ),
           ScanResult(
@@ -171,15 +180,15 @@ class DailyHistory {
               fiber: 0,
               sodium: 0,
             ),
-            scannedAt: now.subtract(const Duration(days: 1, hours: 13)),
+            scannedAt: DateTime(year, 12, 26, 18, 00),
             isSweetDrink: false,
           ),
         ],
-        totalCalories: 280,
-        totalProtein: 15,
-        totalCarbs: 30,
-        totalFat: 12,
-        totalSugar: 5,
+        totalCalories: 450,
+        totalProtein: 8,
+        totalCarbs: 60,
+        totalFat: 20,
+        totalSugar: 4,
         sweetDrinkCount: 0,
       ),
     ];

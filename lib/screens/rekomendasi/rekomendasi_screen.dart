@@ -165,11 +165,6 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    menu.reason,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
                     'Estimasi: ${menu.price}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: AppTheme.successGreen,
