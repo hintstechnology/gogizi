@@ -5,32 +5,77 @@
 *.swp
 .DS_Store
 .atom/
-.build/
 .buildlog/
 .history
 .svn/
-.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
+*.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code related
+# Uncomment if you want to ignore user-specific settings
+# .vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
-**/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
 /build/
+coverage/
+
+# Android related
+**/android/local.properties
+**/android/key.properties
+**/android/**/*.keystore
+**/android/**/*.jks
+**/android/.gradle
+**/android/captures/
+/android/app/build/
+/android/build/
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS related
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Flutter/.last_build_id
+**/ios/.tmp/
+
+# CocoaPods
+**/ios/Pods/
+**/ios/Podfile.lock
+
+# Windows related
+**/windows/flutter/ephemeral/
+
+# Linux related
+**/linux/flutter/ephemeral/
+
+# macOS related
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# Environment variables
+.env
+.env.*
+!.env.example
 
 # Symbolication related
 app.*.symbols
@@ -38,19 +83,7 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Generated files
-*.iml
-android/local.properties
-android/.gradle/
-android/app/build/
-android/build/
-
-# Icon generation (keep source, ignore generated)
+# Icon generation (Preserved from previous config)
 android/app/src/main/res/mipmap-*/ic_launcher*.png
 android/app/src/main/res/mipmap-anydpi-v26/
 
@@ -58,9 +91,5 @@ android/app/src/main/res/mipmap-anydpi-v26/
 *.tmp
 *.temp
 *.bak
-*.swp
 *~
-
-# OS files
 Thumbs.db
-.DS_Store
