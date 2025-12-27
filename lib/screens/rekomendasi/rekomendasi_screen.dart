@@ -9,16 +9,8 @@ class RekomendasiScreen extends StatefulWidget {
 }
 
 class _RekomendasiScreenState extends State<RekomendasiScreen> {
-  final List<String> _filters = [
-    'Murah',
-    'Tinggi Protein',
-    'Rendah Gula',
-    'Rendah Lemak',
-    'Cepat Saji Sehat',
-  ];
-  final Set<String> _selectedFilters = {};
-
-  final List<MenuRecommendation> _recommendations = [
+  // Master list of recommendations
+  final List<MenuRecommendation> _allRecommendations = [
     MenuRecommendation(
       name: 'Nasi Uduk + Ayam Goreng + Sayur',
       calories: 450,
@@ -27,7 +19,6 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
       fat: 15,
       reason: 'Seimbang antara karbohidrat, protein, dan serat. Cocok untuk makan siang.',
       price: 'Rp 15.000',
-      isLocal: true,
     ),
     MenuRecommendation(
       name: 'Gado-gado',
@@ -37,7 +28,6 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
       fat: 12,
       reason: 'Tinggi serat, rendah kalori, kaya vitamin dari sayuran segar.',
       price: 'Rp 12.000',
-      isLocal: true,
     ),
     MenuRecommendation(
       name: 'Sate Ayam + Lontong',
@@ -47,7 +37,6 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
       fat: 12,
       reason: 'Tinggi protein, cocok untuk pemulihan otot setelah aktivitas.',
       price: 'Rp 18.000',
-      isLocal: true,
     ),
     MenuRecommendation(
       name: 'Salad Buah + Yogurt',
@@ -57,7 +46,6 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
       fat: 5,
       reason: 'Rendah kalori, tinggi serat, cocok untuk camilan sehat.',
       price: 'Rp 10.000',
-      isLocal: false,
     ),
     MenuRecommendation(
       name: 'Bubur Ayam',
@@ -67,9 +55,59 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
       fat: 8,
       reason: 'Mudah dicerna, cocok untuk sarapan atau makan malam.',
       price: 'Rp 12.000',
-      isLocal: true,
+    ),
+    MenuRecommendation(
+      name: 'Soto Ayam + Nasi',
+      calories: 400,
+      protein: 22,
+      carbs: 45,
+      fat: 15,
+      reason: 'Kuah hangat menyegarkan, sumber protein dan karbohidrat yang baik.',
+      price: 'Rp 15.000',
+    ),
+    MenuRecommendation(
+      name: 'Ketoprak',
+      calories: 380,
+      protein: 12,
+      carbs: 45,
+      fat: 14,
+      reason: 'Alternatif menu berbasis tahu dan bihun dengan bumbu kacang.',
+      price: 'Rp 14.000',
+    ),
+    MenuRecommendation(
+      name: 'Mie Ayam + Pangsit',
+      calories: 420,
+      protein: 18,
+      carbs: 55,
+      fat: 12,
+      reason: 'Menu populer yang mengenyangkan, dengan topping ayam cincang.',
+      price: 'Rp 13.000',
+    ),
+    MenuRecommendation(
+      name: 'Capcay Kuah/Goreng',
+      calories: 250,
+      protein: 10,
+      carbs: 15,
+      fat: 12,
+      reason: 'Penuh dengan aneka sayuran, kaya serat dan vitamin.',
+      price: 'Rp 15.000',
     ),
   ];
+
+  List<MenuRecommendation> _currentRecommendations = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _regenerateRecommendations();
+  }
+
+  void _regenerateRecommendations() {
+    setState(() {
+      final shuffled = List<MenuRecommendation>.from(_allRecommendations)..shuffle();
+      _currentRecommendations = shuffled.take(3).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,165 +117,70 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
         title: const Text('Rekomendasi Menu'),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppTheme.successGreen,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.auto_awesome, size: 16, color: Colors.white),
-                const SizedBox(width: 4),
-                Text(
-                  'AI-Optimized',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+            margin: const EdgeInsets.only(right: 8),
+            child: TextButton.icon(
+              onPressed: _regenerateRecommendations,
+              style: TextButton.styleFrom(
+                backgroundColor: AppTheme.successGreen,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ],
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Regenerate'),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
-      body: Column(
-        children: [
-          // Filter chips
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: _filters.map((filter) {
-                  final isSelected = _selectedFilters.contains(filter);
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(
-                        filter,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: isSelected ? Colors.white : const Color(0xFF8B4513), // Coklat saat tidak aktif, putih saat aktif
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedFilters.add(filter);
-                          } else {
-                            _selectedFilters.remove(filter);
-                          }
-                        });
-                      },
-                      backgroundColor: Colors.white,
-                      selectedColor: AppTheme.primaryOrange,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                          color: isSelected ? AppTheme.primaryOrange : const Color(0xFF8B4513).withOpacity(0.3),
-                          width: 1,
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _currentRecommendations.length,
+        itemBuilder: (context, index) {
+          final menu = _currentRecommendations[index];
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    menu.name,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _buildMacroChip('Kal', '${menu.calories}'),
+                      const SizedBox(width: 8),
+                      _buildMacroChip('P', '${menu.protein}g'),
+                      const SizedBox(width: 8),
+                      _buildMacroChip('K', '${menu.carbs}g'),
+                      const SizedBox(width: 8),
+                      _buildMacroChip('L', '${menu.fat}g'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    menu.reason,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Estimasi: ${menu.price}',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppTheme.successGreen,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
             ),
-          ),
-
-          // Recommendations list
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _recommendations.length,
-              itemBuilder: (context, index) {
-                final menu = _recommendations[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                menu.name,
-                                style: Theme.of(context).textTheme.headlineMedium,
-                              ),
-                            ),
-                            if (menu.isLocal)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primaryOrange.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'Lokal',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: AppTheme.primaryOrange,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            _buildMacroChip('Kal', '${menu.calories}'),
-                            const SizedBox(width: 8),
-                            _buildMacroChip('P', '${menu.protein}g'),
-                            const SizedBox(width: 8),
-                            _buildMacroChip('K', '${menu.carbs}g'),
-                            const SizedBox(width: 8),
-                            _buildMacroChip('L', '${menu.fat}g'),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          menu.reason,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              menu.price,
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    color: AppTheme.successGreen,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            TextButton.icon(
-                              onPressed: () {
-                                // Show alternatives
-                                _showAlternatives(context, menu);
-                              },
-                              icon: const Icon(Icons.restaurant_menu, size: 16),
-                              label: const Text('Alternatif'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -257,52 +200,6 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
       ),
     );
   }
-
-  void _showAlternatives(BuildContext context, MenuRecommendation menu) {
-    final alternatives = [
-      '${menu.name} (versi rendah kalori)',
-      'Substitusi dengan porsi lebih kecil',
-      'Tambahkan sayuran sebagai pendamping',
-      'Pilih versi tanpa gula tambahan',
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Alternatif Jajanan Lokal',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 16),
-            ...alternatives.map((alt) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle_outline,
-                          color: AppTheme.successGreen, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(alt)),
-                    ],
-                  ),
-                )),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Tutup'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class MenuRecommendation {
@@ -313,7 +210,6 @@ class MenuRecommendation {
   final int fat;
   final String reason;
   final String price;
-  final bool isLocal;
 
   MenuRecommendation({
     required this.name,
@@ -323,7 +219,6 @@ class MenuRecommendation {
     required this.fat,
     required this.reason,
     required this.price,
-    this.isLocal = false,
   });
 }
 

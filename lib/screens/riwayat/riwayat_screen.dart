@@ -14,39 +14,15 @@ class RiwayatScreen extends StatefulWidget {
 
 class _RiwayatScreenState extends State<RiwayatScreen> {
   final List<DailyHistory> _history = DailyHistory.dummyHistory;
-  String _selectedFilter = 'Semua';
-
-  final List<String> _filters = [
-    'Semua',
-    'Makanan',
-    'Minuman',
-    'Minuman Manis',
-  ];
 
   List<ScanResult> get _allScans {
     return _history.expand((day) => day.scanResults).toList();
   }
 
-  List<ScanResult> get _filteredScans {
-    switch (_selectedFilter) {
-      case 'Makanan':
-        return _allScans.where((s) => s.category == FoodCategory.food).toList();
-      case 'Minuman':
-        return _allScans
-            .where((s) => s.category == FoodCategory.drink ||
-                s.category == FoodCategory.sweetDrink)
-            .toList();
-      case 'Minuman Manis':
-        return _allScans.where((s) => s.isSweetDrink).toList();
-      default:
-        return _allScans;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final groupedHistory = <DateTime, List<ScanResult>>{};
-    for (var scan in _filteredScans) {
+    for (var scan in _allScans) {
       final date = DateTime(
         scan.scannedAt.year,
         scan.scannedAt.month,
@@ -63,87 +39,54 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
       appBar: AppBar(
         title: const Text('Riwayat'),
       ),
-      body: Column(
-        children: [
-          // Filter chips
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: _filters.map((filter) {
-                  final isSelected = _selectedFilter == filter;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(filter),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedFilter = filter;
-                        });
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-
-          // History list
-          Expanded(
-            child: groupedHistory.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.history,
-                          size: 64,
+      body: groupedHistory.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.history,
+                    size: 64,
+                    color: AppTheme.textLight,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Belum ada riwayat scan',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: AppTheme.textLight,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Belum ada riwayat scan',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: AppTheme.textLight,
-                              ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: groupedHistory.length,
-                    itemBuilder: (context, index) {
-                      final entry = groupedHistory.entries.toList()[index];
-                      final date = entry.key;
-                      final scans = entry.value;
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: ExpansionTile(
-                          leading: Icon(
-                            Icons.calendar_today,
-                            color: AppTheme.primaryOrange,
-                          ),
-                          title: Text(
-                            DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date),
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          subtitle: Text(
-                            '${scans.length} item',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          children: scans.map((scan) => _buildScanItem(scan)).toList(),
-                        ),
-                      );
-                    },
                   ),
-          ),
-        ],
-      ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: groupedHistory.length,
+              itemBuilder: (context, index) {
+                final entry = groupedHistory.entries.toList()[index];
+                final date = entry.key;
+                final scans = entry.value;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ExpansionTile(
+                    leading: Icon(
+                      Icons.calendar_today,
+                      color: AppTheme.primaryOrange,
+                    ),
+                    title: Text(
+                      DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date),
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    subtitle: Text(
+                      '${scans.length} item',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    children: scans.map((scan) => _buildScanItem(scan)).toList(),
+                  ),
+                );
+              },
+            ),
     );
   }
 
