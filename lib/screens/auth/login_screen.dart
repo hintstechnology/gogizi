@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../main/main_navigation.dart';
+import '../admin/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,7 +30,25 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simulate API call
+      // Special check for Admin Login
+      if (_emailController.text == 'gogizi2026@gmail.com' &&
+          _passwordController.text == 'admin123') {
+        
+        // Simulate "logging in" delay
+        await Future.delayed(const Duration(seconds: 1));
+        
+        if (mounted) {
+           setState(() {
+            _isLoading = false;
+          });
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+          );
+        }
+        return;
+      }
+
+      // Simulate API call for normal users
       await Future.delayed(const Duration(seconds: 1));
 
       if (mounted) {
