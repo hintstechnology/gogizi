@@ -284,7 +284,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: const Text('Daftar'),
         backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.primaryOrange,
         elevation: 0,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: AppTheme.primaryOrange,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

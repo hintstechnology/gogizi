@@ -77,8 +77,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: AppTheme.primaryOrange,
         elevation: 0,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: AppTheme.primaryOrange,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -247,8 +252,13 @@ class UserDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(user.name ?? 'Detail User'),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: AppTheme.primaryOrange,
         elevation: 0,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: AppTheme.primaryOrange,
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
