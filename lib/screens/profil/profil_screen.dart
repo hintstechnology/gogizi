@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../models/user_profile.dart';
 import '../detail_kebutuhan/detail_kebutuhan_screen.dart';
+import '../auth/login_screen.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -408,6 +409,26 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 child: const Text('Simpan Profil'),
               ),
 
+              const SizedBox(height: 16),
+
+              // Logout Button
+              OutlinedButton.icon(
+                onPressed: () {
+                  // Navigate to Login Screen and remove all previous routes
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.errorRed,
+                  side: const BorderSide(color: AppTheme.errorRed),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                icon: const Icon(Icons.logout),
+                label: const Text('Keluar'),
+              ),
+              
               const SizedBox(height: 24),
             ],
           ),
@@ -435,4 +456,5 @@ class _ProfilScreenState extends State<ProfilScreen> {
     );
   }
 }
+
 
