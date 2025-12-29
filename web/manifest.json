@@ -1,11 +1,11 @@
 {
-    "name": "GoGizi",
-    "short_name": "GoGizi",
+    "name": "GiziGo",
+    "short_name": "GiziGo",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "GoGizi Aplication",
+    "background_color": "#0D47A1",
+    "theme_color": "#0D47A1",
+    "description": "GiziGo Application",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
