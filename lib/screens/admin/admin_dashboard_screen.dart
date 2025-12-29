@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../models/user_profile.dart'; // Reusing existing model structure
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});

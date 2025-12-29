@@ -143,7 +143,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                         backgroundColor: AppTheme.cardGray,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           _challenge.isCompleted
-                              ? AppTheme.successGreen
+                              ? AppTheme.accentGold
                               : AppTheme.primaryOrange,
                         ),
                       ),
@@ -190,14 +190,14 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                               height: 40,
                               decoration: BoxDecoration(
                                 color: dayStatus.completed
-                                    ? AppTheme.successGreen
+                                    ? AppTheme.accentGold
                                     : isPast
                                         ? AppTheme.cardGray
                                         : AppTheme.primaryOrange.withOpacity(0.1),
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: dayStatus.completed
-                                      ? AppTheme.successGreen
+                                      ? AppTheme.accentGold
                                       : AppTheme.textLight.withOpacity(0.3),
                                   width: 2,
                                 ),
@@ -240,7 +240,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                                         Icon(
                                           Icons.check_circle,
                                           size: 14,
-                                          color: AppTheme.successGreen,
+                                          color: AppTheme.accentGold,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(

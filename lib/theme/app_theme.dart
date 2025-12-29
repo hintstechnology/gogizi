@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Color Palette
-  static const Color primaryOrange = Color(0xFFFF7A00);
-  static const Color backgroundLightOrange = Color(0xFFFFF3E6);
-  static const Color accentDarkOrange = Color(0xFFE66A00);
+  // Color Palette - UB Theme (Blue & Gold)
+  static const Color primaryBlue = Color(0xFF0D47A1); // Deep Blue like UB
+  static const Color backgroundLight = Color(0xFFF5F5F5); // Light Gray/White
+  static const Color accentGold = Color(0xFFD4AF37); // Metallic Gold (Darker)
   static const Color cardWhite = Color(0xFFFFFFFF);
-  static const Color cardGray = Color(0xFFF5F5F5);
+  static const Color cardGray = Color(0xFFEEEEEE);
   static const Color successGreen = Color(0xFF4CAF50);
   static const Color textDark = Color(0xFF212121);
   static const Color textLight = Color(0xFF757575);
   static const Color errorRed = Color(0xFFE53935);
   static const Color warningRed = Color(0xFFFF5252);
+  
+  // Aliases for backward compatibility during refactor, mapped to new colors
+  static const Color primaryOrange = primaryBlue; 
+  static const Color backgroundLightOrange = backgroundLight;
+  static const Color accentDarkOrange = accentGold;
 
   static ThemeData get lightTheme {
     return ThemeData(

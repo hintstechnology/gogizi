@@ -84,7 +84,7 @@ class _ScanScreenState extends State<ScanScreen> {
 
             // Camera placeholder
             Container(
-              margin: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
               height: 300,
               decoration: BoxDecoration(
                 color: AppTheme.cardGray,

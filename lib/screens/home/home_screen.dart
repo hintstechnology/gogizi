@@ -253,12 +253,12 @@ class HomeScreen extends StatelessWidget {
                               height: 32,
                               decoration: BoxDecoration(
                                 color: isCompleted
-                                    ? AppTheme.successGreen
+                                    ? AppTheme.accentGold
                                     : AppTheme.cardGray,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: isCompleted
-                                      ? AppTheme.successGreen
+                                      ? AppTheme.accentGold
                                       : AppTheme.textLight.withOpacity(0.3),
                                   width: 2,
                                 ),
@@ -285,7 +285,7 @@ class HomeScreen extends StatelessWidget {
                                   ? Icons.check_circle
                                   : Icons.radio_button_unchecked,
                               color: challenge.todayScanned
-                                  ? AppTheme.successGreen
+                                  ? AppTheme.accentGold
                                   : AppTheme.textLight,
                               size: 16,
                             ),

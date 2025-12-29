@@ -18,7 +18,7 @@ class GoGiziApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GoGizi',
+      title: 'GiziGo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkOnboardingStatus() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 3)); // Increased duration slightly to view logos
     
     if (!mounted) return;
 
@@ -70,10 +70,11 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
-      body: Center(
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Spacer(),
+            // Main App Logo
             Icon(
               Icons.restaurant_menu,
               size: 100,
@@ -81,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'GoGizi',
+              'GiziGo',
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
                     color: AppTheme.primaryOrange,
                     fontWeight: FontWeight.bold,
@@ -94,6 +95,33 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 48),
             const CircularProgressIndicator(),
+            const Spacer(),
+            
+            // Supported By Section
+            Text(
+              'Didukung oleh:',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // UB Logo
+                Image.asset(
+                  'assets/images/ub_logo.png',
+                  height: 50,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.school, size: 50, color: Colors.grey),
+                ),
+                const SizedBox(width: 24),
+                // AI Center Logo
+                Image.asset(
+                  'assets/images/ai_center_logo.png',
+                  height: 50,
+                   errorBuilder: (context, error, stackTrace) => const Icon(Icons.computer, size: 50, color: Colors.grey),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
           ],
         ),
       ),

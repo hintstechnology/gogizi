@@ -189,8 +189,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 children: [
                   Expanded(
                     child: ChoiceChip(
-                      label: const Text('Laki-laki'),
+                      label: Text(
+                        'Laki-laki',
+                        style: TextStyle(
+                          color: _selectedGender == Gender.male
+                              ? Colors.white
+                              : AppTheme.textDark,
+                        ),
+                      ),
                       selected: _selectedGender == Gender.male,
+                      selectedColor: AppTheme.primaryOrange,
                       onSelected: (selected) {
                         setState(() {
                           _selectedGender = selected ? Gender.male : null;
@@ -201,8 +209,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ChoiceChip(
-                      label: const Text('Perempuan'),
+                      label: Text(
+                        'Perempuan',
+                        style: TextStyle(
+                          color: _selectedGender == Gender.female
+                              ? Colors.white
+                              : AppTheme.textDark,
+                        ),
+                      ),
                       selected: _selectedGender == Gender.female,
+                      selectedColor: AppTheme.primaryOrange,
                       onSelected: (selected) {
                         setState(() {
                           _selectedGender = selected ? Gender.female : null;
@@ -317,8 +333,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 spacing: 8,
                 children: [
                   ChoiceChip(
-                    label: const Text('Rendah'),
+                    label: Text(
+                      'Rendah',
+                      style: TextStyle(
+                        color: _selectedActivityLevel == ActivityLevel.low
+                            ? Colors.white
+                            : AppTheme.textDark,
+                      ),
+                    ),
                     selected: _selectedActivityLevel == ActivityLevel.low,
+                    selectedColor: AppTheme.primaryOrange,
                     onSelected: (selected) {
                       setState(() {
                         _selectedActivityLevel =
@@ -327,8 +351,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     },
                   ),
                   ChoiceChip(
-                    label: const Text('Sedang'),
+                    label: Text(
+                      'Sedang',
+                      style: TextStyle(
+                        color: _selectedActivityLevel == ActivityLevel.medium
+                            ? Colors.white
+                            : AppTheme.textDark,
+                      ),
+                    ),
                     selected: _selectedActivityLevel == ActivityLevel.medium,
+                    selectedColor: AppTheme.primaryOrange,
                     onSelected: (selected) {
                       setState(() {
                         _selectedActivityLevel =
@@ -337,8 +369,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     },
                   ),
                   ChoiceChip(
-                    label: const Text('Tinggi'),
+                    label: Text(
+                      'Tinggi',
+                      style: TextStyle(
+                        color: _selectedActivityLevel == ActivityLevel.high
+                            ? Colors.white
+                            : AppTheme.textDark,
+                      ),
+                    ),
                     selected: _selectedActivityLevel == ActivityLevel.high,
+                    selectedColor: AppTheme.primaryOrange,
                     onSelected: (selected) {
                       setState(() {
                         _selectedActivityLevel =
@@ -403,7 +443,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
               ElevatedButton(
                 onPressed: _saveProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.successGreen,
+                  backgroundColor: AppTheme.accentGold,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text('Simpan Profil'),

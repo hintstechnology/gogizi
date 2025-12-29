@@ -121,7 +121,7 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
             child: TextButton.icon(
               onPressed: _regenerateRecommendations,
               style: TextButton.styleFrom(
-                backgroundColor: AppTheme.successGreen,
+                backgroundColor: AppTheme.accentGold,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -167,7 +167,7 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
                   Text(
                     'Estimasi: ${menu.price}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: AppTheme.successGreen,
+                          color: AppTheme.accentGold,
                           fontWeight: FontWeight.bold,
                         ),
                   ),

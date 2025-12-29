@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../main/main_navigation.dart';
 import '../admin/admin_dashboard_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -92,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'GoGizi',
+                  'GiziGo',
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
                         color: AppTheme.primaryOrange,
                         fontWeight: FontWeight.bold,

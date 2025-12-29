@@ -70,7 +70,6 @@ coverage/
 **/macos/Pods/
 
 # Web related
-lib/generated_plugin_registrant.dart
 
 # Environment variables
 .env
