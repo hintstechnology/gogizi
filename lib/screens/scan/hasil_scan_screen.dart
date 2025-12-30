@@ -1,158 +1,273 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import '../../theme/app_theme.dart';
 import '../../models/scan_result.dart';
-import '../riwayat/riwayat_screen.dart';
 import '../rekomendasi/rekomendasi_screen.dart';
 
-class HasilScanScreen extends StatelessWidget {
+class HasilScanScreen extends StatefulWidget {
   final String imagePath;
 
   const HasilScanScreen({super.key, required this.imagePath});
 
-  // Generate dummy scan result
-  ScanResult _generateDummyResult() {
-    // Simulate different results based on random or image analysis
-    final labels = [
-      'Es Teh Manis',
-      'Nasi Goreng',
-      'Gado-gado',
-      'Bakso',
-      'Mie Ayam',
-    ];
-    final label = labels[DateTime.now().millisecond % labels.length];
+  @override
+  State<HasilScanScreen> createState() => _HasilScanScreenState();
+}
 
+class _HasilScanScreenState extends State<HasilScanScreen> {
+  // Predefined food list
+  final List<String> _foodOptions = [
+    'Bakso',
+    'Cimol',
+    'Seblak',
+    'Telur Gulung',
+    'Tempura',
+    'Batagor',
+    'Air',
+    'Es Teh',
+    'Thai Tea',
+    'Minuman botol',
+  ];
+
+  String? _selectedFood;
+  bool _isConfirmed = false;
+  ScanResult? _result;
+
+  @override
+  void initState() {
+    super.initState();
+    // Simulate prediction (default to first or random)
+    _selectedFood = _foodOptions[3]; // Default to 'Telur Gulung' for now
+  }
+
+  // Generate result based on selected food
+  void _generateResult() {
+    if (_selectedFood == null) return;
+
+    final label = _selectedFood!;
     final isSweetDrink = label.toLowerCase().contains('teh') ||
-        label.toLowerCase().contains('es') ||
-        label.toLowerCase().contains('manis');
+        (label.toLowerCase().contains('air') && label != 'Air') || // 'Air' is water
+        label.toLowerCase().contains('minuman') ||
+        label.toLowerCase().contains('thai');
 
     NutritionalInfo nutritionalInfo;
-    if (isSweetDrink) {
-      nutritionalInfo = NutritionalInfo(
-        calories: 120,
-        protein: 0,
-        carbs: 30,
-        fat: 0,
-        sugar: 28,
-        fiber: 0,
-        sodium: 10,
-      );
-    } else if (label.toLowerCase().contains('gado')) {
-      nutritionalInfo = NutritionalInfo(
-        calories: 280,
-        protein: 15,
-        carbs: 30,
-        fat: 12,
-        sugar: 5,
-        fiber: 8,
-        sodium: 600,
-      );
-    } else {
-      nutritionalInfo = NutritionalInfo(
-        calories: 350,
-        protein: 12,
-        carbs: 45,
-        fat: 15,
-        sugar: 3,
-        fiber: 2,
-        sodium: 800,
-      );
+    
+    // Simple mock data mapping
+    switch (label) {
+      case 'Bakso':
+        nutritionalInfo = NutritionalInfo(calories: 320, protein: 18, carbs: 45, fat: 8, sugar: 2, fiber: 2, sodium: 650);
+        break;
+      case 'Cimol':
+        nutritionalInfo = NutritionalInfo(calories: 250, protein: 2, carbs: 55, fat: 12, sugar: 0, fiber: 1, sodium: 300);
+        break;
+      case 'Seblak':
+        nutritionalInfo = NutritionalInfo(calories: 450, protein: 12, carbs: 50, fat: 22, sugar: 4, fiber: 3, sodium: 900);
+        break;
+      case 'Telur Gulung':
+        nutritionalInfo = NutritionalInfo(calories: 150, protein: 6, carbs: 8, fat: 10, sugar: 0, fiber: 0, sodium: 200);
+        break;
+      case 'Tempura':
+         nutritionalInfo = NutritionalInfo(calories: 200, protein: 8, carbs: 25, fat: 8, sugar: 0, fiber: 0, sodium: 400);
+         break;
+      case 'Batagor':
+         nutritionalInfo = NutritionalInfo(calories: 380, protein: 14, carbs: 35, fat: 20, sugar: 5, fiber: 2, sodium: 550);
+         break;
+      case 'Air':
+         nutritionalInfo = NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
+         break;
+      case 'Es Teh':
+         nutritionalInfo = NutritionalInfo(calories: 90, protein: 0, carbs: 22, fat: 0, sugar: 22, fiber: 0, sodium: 10);
+         break;
+      case 'Thai Tea':
+         nutritionalInfo = NutritionalInfo(calories: 220, protein: 4, carbs: 35, fat: 8, sugar: 30, fiber: 0, sodium: 40);
+         break;
+      case 'Minuman botol':
+         nutritionalInfo = NutritionalInfo(calories: 140, protein: 0, carbs: 35, fat: 0, sugar: 35, fiber: 0, sodium: 20);
+         break;
+      default:
+        nutritionalInfo = NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
     }
 
-    final riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);
+    RiskAnalysis riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);
+    
+    // Custom logic for water
+    if (label == 'Air') {
+        riskAnalysis = RiskAnalysis(
+            risks: [],
+            warnings: ['Tetap jaga hidrasi tubuh!'],
+            overallRisk: 'Aman',
+        );
+    }
+
     final alternatives = ScanResult.generateAlternatives(
       label,
       isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food,
     );
 
-    return ScanResult(
-      id: 'scan_${DateTime.now().millisecondsSinceEpoch}',
-      label: label,
-      confidence: 0.88,
-      category: isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food,
-      nutritionalInfo: nutritionalInfo,
-      scannedAt: DateTime.now(),
-      imagePath: imagePath,
-      isSweetDrink: isSweetDrink,
-      riskAnalysis: riskAnalysis,
-      healthierAlternatives: alternatives,
-    );
+    setState(() {
+      _result = ScanResult(
+        id: 'scan_${DateTime.now().millisecondsSinceEpoch}',
+        label: label,
+        confidence: 0.95, // High confidence since user confirmed
+        category: isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food,
+        nutritionalInfo: nutritionalInfo,
+        scannedAt: DateTime.now(),
+        imagePath: widget.imagePath,
+        isSweetDrink: isSweetDrink && label != 'Air', // Air is drink but not sweet
+        riskAnalysis: riskAnalysis,
+        healthierAlternatives: alternatives,
+      );
+      _isConfirmed = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final result = _generateDummyResult();
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundLightOrange,
+      appBar: AppBar(
+        title: Text(_isConfirmed ? 'Hasil Analisis' : 'Konfirmasi Scan'),
+      ),
+      body: _isConfirmed ? _buildAnalysisView() : _buildConfirmationView(),
+    );
+  }
+
+  Widget _buildConfirmationView() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Captured Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: kIsWeb
+                ? Image.network(
+                    widget.imagePath,
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  )
+                : Image.file(
+                    File(widget.imagePath),
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+          const SizedBox(height: 24),
+          
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   Text(
+                    'Apa yang Anda makan/minum?',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Kami mendeteksi objek ini, namun Anda bisa mengubahnya jika salah.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Dropdown
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedFood,
+                        isExpanded: true,
+                        hint: const Text('Pilih Nama Makanan/Minuman'),
+                        items: _foodOptions.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedFood = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          ElevatedButton(
+            onPressed: _selectedFood != null ? _generateResult : null,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: AppTheme.primaryBlue, // UB Blue
+            ),
+            child: const Text('Lanjut Analisis Gizi'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnalysisView() {
+    final result = _result!;
     final riskColor = result.riskAnalysis!.overallRisk == 'Tinggi'
         ? AppTheme.errorRed
         : result.riskAnalysis!.overallRisk == 'Sedang'
             ? Colors.orange
-            : AppTheme.successGreen;
+            : result.riskAnalysis!.overallRisk == 'Aman'
+              ? AppTheme.primaryBlue
+              : AppTheme.successGreen;
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLightOrange,
-      appBar: AppBar(
-        title: const Text('Hasil Scan'),
-      ),
-      body: SingleChildScrollView(
+    return SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Scanned image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.file(
-                File(imagePath),
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Label and confidence
-            Card(
+             // Header Result
+             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image: kIsWeb
+                              ? NetworkImage(widget.imagePath)
+                              : FileImage(File(widget.imagePath)) as ImageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Label',
-                            style: Theme.of(context).textTheme.bodySmall,
+                            result.label,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontSize: 20,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            result.label,
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryOrange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '${(result.confidence * 100).toInt()}%',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  color: AppTheme.primaryOrange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          Text(
-                            'Confidence',
+                            ' ${result.isSweetDrink ? "Minuman" : "Makanan"}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -163,7 +278,9 @@ class HasilScanScreen extends StatelessWidget {
               ),
             ),
 
-            // Category badge
+            const SizedBox(height: 16),
+
+            // Category badge if warning needed
             if (result.isSweetDrink)
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -202,13 +319,13 @@ class HasilScanScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 16),
-                    _buildNutrientRow(context, 'Kalori', '${result.nutritionalInfo.calories.toInt()} kcal'),
-                    _buildNutrientRow(context, 'Protein', '${result.nutritionalInfo.protein.toInt()} g'),
-                    _buildNutrientRow(context, 'Karbohidrat', '${result.nutritionalInfo.carbs.toInt()} g'),
-                    _buildNutrientRow(context, 'Lemak', '${result.nutritionalInfo.fat.toInt()} g'),
-                    _buildNutrientRow(context, 'Gula', '${result.nutritionalInfo.sugar.toInt()} g'),
-                    _buildNutrientRow(context, 'Serat', '${result.nutritionalInfo.fiber.toInt()} g'),
-                    _buildNutrientRow(context, 'Natrium', '${result.nutritionalInfo.sodium.toInt()} mg'),
+                    _buildNutrientRow('Kalori', '${result.nutritionalInfo.calories.toInt()} kcal'),
+                    _buildNutrientRow('Protein', '${result.nutritionalInfo.protein.toInt()} g'),
+                    _buildNutrientRow('Karbohidrat', '${result.nutritionalInfo.carbs.toInt()} g'),
+                    _buildNutrientRow('Lemak', '${result.nutritionalInfo.fat.toInt()} g'),
+                    _buildNutrientRow('Gula', '${result.nutritionalInfo.sugar.toInt()} g'),
+                    _buildNutrientRow('Serat', '${result.nutritionalInfo.fiber.toInt()} g'),
+                    _buildNutrientRow('Natrium', '${result.nutritionalInfo.sodium.toInt()} mg'),
                   ],
                 ),
               ),
@@ -277,9 +394,9 @@ class HasilScanScreen extends StatelessWidget {
                             ),
                           )),
                     ],
-                    if (result.riskAnalysis!.warnings.isNotEmpty) ...[
+                   if (result.riskAnalysis!.warnings.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      ...result.riskAnalysis!.warnings.map((warning) => Padding(
+                       ...result.riskAnalysis!.warnings.map((warning) => Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +416,7 @@ class HasilScanScreen extends StatelessWidget {
                               ],
                             ),
                           )),
-                    ],
+                   ]
                   ],
                 ),
               ),
@@ -308,6 +425,7 @@ class HasilScanScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Healthier alternatives
+            if (result.healthierAlternatives != null && result.healthierAlternatives!.isNotEmpty)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -367,7 +485,7 @@ class HasilScanScreen extends StatelessWidget {
                       Navigator.of(context).pop();
                     },
                     icon: const Icon(Icons.save_outlined),
-                    label: const Text('Simpan ke Riwayat'),
+                    label: const Text('Simpan'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -379,48 +497,31 @@ class HasilScanScreen extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.restaurant_menu),
-                    label: const Text('Lihat Rekomendasi'),
+                    label: const Text('Rekomendasi'),
                   ),
                 ),
               ],
             ),
 
             const SizedBox(height: 16),
-
-            // Disclaimer
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.cardGray,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: AppTheme.textLight,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Hasil ini adalah estimasi untuk tujuan edukatif. Bukan pengganti konsultasi medis.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ),
+            
+             // Re-scan button (Back to confirm)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isConfirmed = false;
+                });
+              }, 
+              child: const Text('Scan Ulang / Ubah Data'),
             ),
 
             const SizedBox(height: 24),
           ],
         ),
-      ),
-    );
+      );
   }
 
-  Widget _buildNutrientRow(BuildContext context, String label, String value) {
+  Widget _buildNutrientRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -439,4 +540,3 @@ class HasilScanScreen extends StatelessWidget {
     );
   }
 }
-
