@@ -75,10 +75,10 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             const Spacer(),
             // Main App Logo
-            Icon(
-              Icons.restaurant_menu,
-              size: 100,
-              color: AppTheme.primaryOrange,
+            Image.asset(
+              'assets/images/Logo_Fix.png',
+              width: 150,
+              height: 150,
             ),
             const SizedBox(height: 24),
             Text(
@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Edukasi & Monitoring Gizi Mahasiswa',
+              'Pantau Gizi, Hidup Makin Hepi!',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 48),
@@ -117,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 Image.asset(
                   'assets/images/ai_center_logo.png',
                   height: 50,
-                   errorBuilder: (context, error, stackTrace) => const Icon(Icons.computer, size: 50, color: Colors.grey),
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.computer, size: 50, color: Colors.grey),
                 ),
               ],
             ),

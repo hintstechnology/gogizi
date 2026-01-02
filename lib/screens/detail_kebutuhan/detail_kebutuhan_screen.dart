@@ -33,7 +33,7 @@ class DetailKebutuhanScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Kebutuhan Gizi Harian Anda',
+                      'Kebutuhan Gizi Harian Kamu',
                       style: Theme.of(context).textTheme.headlineMedium,
                       textAlign: TextAlign.center,
                     ),

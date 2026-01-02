@@ -154,6 +154,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: cardGray,
         selectedColor: primaryOrange,
+        checkmarkColor: Colors.white,
         labelStyle: GoogleFonts.inter(fontSize: 14),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(

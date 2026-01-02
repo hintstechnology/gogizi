@@ -129,56 +129,133 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Regenerate'),
+              label: const Text('Cari Menu Lain'),
             ),
           ),
           const SizedBox(width: 8),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _currentRecommendations.length,
-        itemBuilder: (context, index) {
-          final menu = _currentRecommendations[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    menu.name,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
                     children: [
-                      _buildMacroChip('Kal', '${menu.calories}'),
-                      const SizedBox(width: 8),
-                      _buildMacroChip('P', '${menu.protein}g'),
-                      const SizedBox(width: 8),
-                      _buildMacroChip('K', '${menu.carbs}g'),
-                      const SizedBox(width: 8),
-                      _buildMacroChip('L', '${menu.fat}g'),
+                       Image.asset(
+                        'assets/images/rekom_rb.png',
+                        height: 80,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Menu Pilihan Buat Lu',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Biar gak bingung mau makan apa hari ini, Bestie!',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Estimasi: ${menu.price}',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: AppTheme.accentGold,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
+                ),
               ),
             ),
-          );
-        },
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryOrange,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.white, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Rekomendasi ini disusun khusus berdasarkan spesifikasi kebutuhan gizimu, Bestie!',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final menu = _currentRecommendations[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            menu.name,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            menu.reason,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              _buildMacroChip('Kal', '${menu.calories}'),
+                              const SizedBox(width: 8),
+                              _buildMacroChip('P', '${menu.protein}g'),
+                              const SizedBox(width: 8),
+                              _buildMacroChip('K', '${menu.carbs}g'),
+                              const SizedBox(width: 8),
+                              _buildMacroChip('L', '${menu.fat}g'),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Estimasi: ${menu.price}',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                  color: AppTheme.accentGold,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+              childCount: _currentRecommendations.length,
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  // Helper moved to keep class structure if needed, but here we just replaced the body build.
+  // We need to keep the _buildMacroChip method.
 
   Widget _buildMacroChip(String label, String value) {
     return Container(

@@ -13,11 +13,11 @@ class HomeScreen extends StatelessWidget {
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Selamat Pagi';
+      return 'Morning Bestie! ☀️';
     } else if (hour < 17) {
-      return 'Selamat Siang';
+      return 'Siang Bestie! ☀️';
     } else {
-      return 'Selamat Malam';
+      return 'Malem Bestie! 🌙';
     }
   }
 
@@ -37,19 +37,30 @@ class HomeScreen extends StatelessWidget {
               // Header with greeting
               Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(
-                      _getGreeting(),
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: AppTheme.textLight,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getGreeting(),
+                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                  color: AppTheme.textLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
+                          const SizedBox(height: 4),
+                          Text(
+                            profile.name ?? 'Sobat Sehat',
+                            style: Theme.of(context).textTheme.displayMedium,
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      profile.name ?? 'Pengguna',
-                      style: Theme.of(context).textTheme.displayMedium,
+                    Image.asset(
+                      'assets/images/menyapa_rb.png',
+                      height: 80,
                     ),
                   ],
                 ),

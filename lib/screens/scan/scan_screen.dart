@@ -98,21 +98,20 @@ class _ScanScreenState extends State<ScanScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.camera_alt_outlined,
-                    size: 64,
-                    color: AppTheme.textLight,
+                  Image.asset(
+                    'assets/images/kamera_rb.png',
+                    height: 100,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Kamera Siap',
+                    'Kameranya Ready Nih!',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: AppTheme.textLight,
                         ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Ambil foto jajanan untuk dianalisis',
+                    'Jepret jajanan lu biar ketahuan gizinya!',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

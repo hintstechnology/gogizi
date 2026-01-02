@@ -4,6 +4,7 @@ enum ActivityLevel { low, medium, high }
 class UserProfile {
   final String? id;
   final String? email;
+  final String? phoneNumber;
   final String? name;
   final int? age;
   final Gender? gender;
@@ -18,6 +19,7 @@ class UserProfile {
   UserProfile({
     this.id,
     this.email,
+    this.phoneNumber,
     this.name,
     this.age,
     this.gender,
@@ -34,6 +36,7 @@ class UserProfile {
     return {
       'id': id,
       'email': email,
+      'phoneNumber': phoneNumber,
       'name': name,
       'age': age,
       'gender': gender?.toString().split('.').last,
@@ -51,6 +54,7 @@ class UserProfile {
     return UserProfile(
       id: json['id'],
       email: json['email'],
+      phoneNumber: json['phoneNumber'],
       name: json['name'],
       age: json['age'],
       gender: json['gender'] != null
@@ -85,6 +89,7 @@ class UserProfile {
     return UserProfile(
       id: 'user_001',
       email: 'mahasiswa@example.com',
+      phoneNumber: '081234567890',
       name: 'Mahasiswa Sehat',
       age: 20,
       gender: Gender.male,

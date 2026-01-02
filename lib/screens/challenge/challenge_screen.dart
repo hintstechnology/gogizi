@@ -46,7 +46,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Tantangan?'),
-        content: const Text('Apakah Anda yakin ingin mereset tantangan? Progress akan hilang.'),
+        content: const Text('Apakah kamu yakin ingin mereset tantangan? Progress bakal hilang.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -87,20 +87,19 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.emoji_events,
-                      size: 64,
-                      color: AppTheme.primaryOrange,
+                    Image.asset(
+                      'assets/images/piala_rb.png',
+                      height: 100,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '7 Hari Sehat Tanpa Minuman Manis',
+                      'Challenge Minggu Ini!',
                       style: Theme.of(context).textTheme.headlineMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tantang dirimu untuk hidup lebih sehat!',
+                      'Gas selesaikan misinya biar makin GG!',
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),

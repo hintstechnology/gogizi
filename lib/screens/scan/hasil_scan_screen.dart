@@ -164,12 +164,12 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                    Text(
-                    'Apa yang Anda makan/minum?',
+                    'Apa yang Kamu makan/minum?',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Kami mendeteksi objek ini, namun Anda bisa mengubahnya jika salah.',
+                    'Kami mendeteksi objek ini, namun kamu bisa mengubahnya jika salah.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 16),

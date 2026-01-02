@@ -16,6 +16,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
   final _ageController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   Gender? _selectedGender;
   int _stressLevel = 3;
@@ -36,6 +37,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
       _ageController.text = profile.age?.toString() ?? '';
       _heightController.text = profile.height?.toString() ?? '';
       _weightController.text = profile.weight?.toString() ?? '';
+      _phoneController.text = profile.phoneNumber ?? '';
       _selectedGender = profile.gender;
       _stressLevel = profile.stressLevel ?? 3;
       _selectedActivityLevel = profile.activityLevel;
@@ -48,6 +50,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
     _ageController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -68,7 +71,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
           profile.weight == null ||
           profile.activityLevel == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lengkapi semua data terlebih dahulu')),
+          const SnackBar(content: Text('Lengkapi semua data dulu ya bestie!')),
         );
         return;
       }
@@ -79,7 +82,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Kebutuhan gizi berhasil dihitung'),
+          content: Text('Sip! Kebutuhan gizi udah dihitung!'),
           backgroundColor: AppTheme.successGreen,
         ),
       );
@@ -89,7 +92,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
   void _saveProfile() {
     if (_calculatedNeeds == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hitung kebutuhan gizi terlebih dahulu')),
+        const SnackBar(content: Text('Hitung dulu dong bestie!')),
       );
       return;
     }
@@ -97,7 +100,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
     // Simulate save
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Profil berhasil disimpan'),
+        content: Text('Profil berhasil disimpan! Mantul!'),
         backgroundColor: AppTheme.successGreen,
       ),
     );
@@ -121,25 +124,35 @@ class _ProfilScreenState extends State<ProfilScreen> {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Column(
+                  child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: AppTheme.primaryOrange.withOpacity(0.2),
-                        child: Icon(
-                          Icons.person,
-                          size: 40,
-                          color: AppTheme.primaryOrange,
+                       Image.asset(
+                        'assets/images/intip_rb.png',
+                        height: 100,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _profile?.name ?? 'Sobat Sehat',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            Text(
+                              _profile?.email ?? 'email@example.com',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Profil Kamu Nih Bestie!',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppTheme.primaryOrange,
+                                fontWeight: FontWeight.bold
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _profile?.name ?? 'Pengguna',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      Text(
-                        _profile?.email ?? 'email@example.com',
-                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ),
@@ -155,19 +168,31 @@ class _ProfilScreenState extends State<ProfilScreen> {
               ),
               const SizedBox(height: 12),
 
+              // Phone Number
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Nomor HP',
+                  hintText: '08xxxxxxxxxx',
+                  prefixIcon: const Icon(Icons.phone),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Age
               TextFormField(
                 controller: _ageController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Umur',
-                  hintText: 'Masukkan umur',
-                  prefixIcon: Icon(Icons.cake_outlined),
+                  hintText: 'Berapa tahun nih?',
+                  prefixIcon: const Icon(Icons.cake_outlined),
                   suffixText: 'tahun',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Umur tidak boleh kosong';
+                    return 'Isi dulu umurnya bestie';
                   }
                   final age = int.tryParse(value);
                   if (age == null || age < 10 || age > 100) {
@@ -237,17 +262,17 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Tinggi Badan',
-                  hintText: 'Masukkan tinggi badan',
-                  prefixIcon: Icon(Icons.height_outlined),
+                  hintText: 'Tinggi kamu berapa?',
+                  prefixIcon: const Icon(Icons.height_outlined),
                   suffixText: 'cm',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Tinggi badan tidak boleh kosong';
+                    return 'Isi tinggi badan dong';
                   }
                   final height = double.tryParse(value);
                   if (height == null || height < 100 || height > 250) {
-                    return 'Tinggi badan harus antara 100-250 cm';
+                    return 'Yang bener dong isinya';
                   }
                   return null;
                 },
@@ -261,17 +286,17 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Berat Badan',
-                  hintText: 'Masukkan berat badan',
-                  prefixIcon: Icon(Icons.monitor_weight_outlined),
+                  hintText: 'Berat badan?',
+                  prefixIcon: const Icon(Icons.monitor_weight_outlined),
                   suffixText: 'kg',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Berat badan tidak boleh kosong';
+                    return 'Isi berat badan ya';
                   }
                   final weight = double.tryParse(value);
                   if (weight == null || weight < 30 || weight > 200) {
-                    return 'Berat badan harus antara 30-200 kg';
+                    return 'Yang bener dong isinya';
                   }
                   return null;
                 },
@@ -496,5 +521,3 @@ class _ProfilScreenState extends State<ProfilScreen> {
     );
   }
 }
-
-

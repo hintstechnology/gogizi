@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       // Special check for Admin Login
-      if (_emailController.text == 'gogizi2026@gmail.com' &&
+      if (_emailController.text == 'gizigo@gmail.com' &&
           _passwordController.text == 'admin123') {
         
         // Simulate "logging in" delay
@@ -86,24 +86,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 48),
 
                 // Logo/Title
-                Icon(
-                  Icons.restaurant_menu,
-                  size: 80,
-                  color: AppTheme.primaryOrange,
+                Image.asset(
+                  'assets/images/Logo_Fix.png',
+                  width: 150,
+                  height: 150,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Text(
-                  'GiziGo',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: AppTheme.primaryOrange,
+                  'Selamat Datang Kembali',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryOrange,
                       ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Edukasi & Monitoring Gizi Mahasiswa',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  'Masuk untuk melanjutkan',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppTheme.textDark,
+                      ),
                   textAlign: TextAlign.center,
                 ),
 
