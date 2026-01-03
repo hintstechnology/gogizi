@@ -24,6 +24,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       weight: 68,
       activityLevel: ActivityLevel.medium,
       createdAt: DateTime.now().subtract(const Duration(days: 45)),
+      phoneNumber: '081234567801',
     ),
     UserProfile(
       id: 'u002',
@@ -35,6 +36,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       weight: 52,
       activityLevel: ActivityLevel.low,
       createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      phoneNumber: '081234567802',
     ),
     UserProfile(
       id: 'u003',
@@ -46,6 +48,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       weight: 85,
       activityLevel: ActivityLevel.high,
       createdAt: DateTime.now().subtract(const Duration(days: 15)),
+      phoneNumber: '081234567803',
     ),
     UserProfile(
       id: 'u004',
@@ -57,6 +60,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       weight: 48,
       activityLevel: ActivityLevel.medium,
       createdAt: DateTime.now().subtract(const Duration(days: 10)),
+      phoneNumber: '081234567804',
     ),
      UserProfile(
       id: 'u005',
@@ -68,6 +72,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       weight: 70,
       activityLevel: ActivityLevel.low,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      phoneNumber: '081234567805',
     ),
   ];
 
@@ -293,6 +298,11 @@ class UserDetailScreen extends StatelessWidget {
                     user.email ?? '-',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
+                  if (user.phoneNumber != null)
+                    Text(
+                      user.phoneNumber!,
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
                   Text(
                     'Bergabung sejak: ${DateFormat('d MMM yyyy').format(user.createdAt ?? DateTime.now())}',
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),

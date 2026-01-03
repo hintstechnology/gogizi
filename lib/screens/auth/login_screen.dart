@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       // Special check for Admin Login
-      if (_emailController.text == 'gizigo@gmail.com' &&
+      if (_emailController.text == 'gizigo2026@gmail.com' &&
           _passwordController.text == 'admin123') {
         
         // Simulate "logging in" delay
