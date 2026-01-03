@@ -128,7 +128,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     children: [
                        Image.asset(
                         'assets/images/intip_rb.png',
-                        height: 100,
+                        height: 130,
                       ),
                       const SizedBox(width: 16),
                       Expanded(

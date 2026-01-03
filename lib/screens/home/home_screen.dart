@@ -60,7 +60,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Image.asset(
                       'assets/images/menyapa_rb.png',
-                      height: 80,
+                      height: 110,
                     ),
                   ],
                 ),
@@ -158,7 +158,7 @@ class HomeScreen extends StatelessWidget {
                             MaterialPageRoute(builder: (_) => const ScanScreen()),
                           );
                         },
-                        icon: const Icon(Icons.qr_code_scanner),
+                        icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
                         label: const Text('Scan Jajanan'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),

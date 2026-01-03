@@ -147,7 +147,7 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
                     children: [
                        Image.asset(
                         'assets/images/rekom_rb.png',
-                        height: 80,
+                        height: 110,
                       ),
                       const SizedBox(width: 16),
                       Expanded(

@@ -100,7 +100,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 children: [
                   Image.asset(
                     'assets/images/kamera_rb.png',
-                    height: 100,
+                    height: 130,
                   ),
                   const SizedBox(height: 16),
                   Text(

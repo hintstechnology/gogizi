@@ -163,6 +163,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
 
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Fitur lupa password segera hadir!')),
+                      );
+                    },
+                    child: Text(
+                      'Lupa Password?',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.primaryOrange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 24),
 
                 // Login button

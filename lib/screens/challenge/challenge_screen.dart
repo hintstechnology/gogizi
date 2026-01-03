@@ -89,7 +89,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                   children: [
                     Image.asset(
                       'assets/images/piala_rb.png',
-                      height: 100,
+                      height: 130,
                     ),
                     const SizedBox(height: 16),
                     Text(
