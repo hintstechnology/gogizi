@@ -76,9 +76,9 @@ class _SplashScreenState extends State<SplashScreen> {
             const Spacer(),
             // Main App Logo
             Image.asset(
-              'assets/images/Logo_Fix.png',
-              width: 150,
-              height: 150,
+              'assets/images/splash_shortcut.png',
+              width: 200, // Slightly larger for splash
+              height: 200,
             ),
             const SizedBox(height: 24),
             Text(

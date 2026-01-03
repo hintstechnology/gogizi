@@ -101,11 +101,11 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "assets/images/Logo_Fix.png"
+  image_path: "assets/images/splash_shortcut.png"
   adaptive_icon_background: "#F5F5F5"
-  adaptive_icon_foreground: "assets/images/Logo_Fix.png"
+  adaptive_icon_foreground: "assets/images/splash_shortcut.png"
   web:
     generate: true
-    image_path: "assets/images/Logo_Fix.png"
+    image_path: "assets/images/splash_shortcut.png"
     background_color: "#0D47A1"
     theme_color: "#0D47A1"
