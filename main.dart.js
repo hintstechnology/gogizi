@@ -85319,7 +85319,7 @@ else if(o!==!0)A.cg(m,!1).oj(A.dX(new A.apm(),null,l))
 else A.cg(m,!1).oj(A.dX(new A.apn(),null,l))
 case 1:return A.J(q,r)}})
 return A.K($async$rL,r)},
-J(a){var s=null,r=A.mg("assets/images/Logo_Fix.png",s,150,150),q=A.j(a).p2.a,p=t.p
+J(a){var s=null,r=A.mg("assets/images/splash_shortcut.png",s,200,200),q=A.j(a).p2.a,p=t.p
 return A.fq(s,B.b3,A.l0(!0,A.bd(A.a([B.nN,r,B.b8,A.Z("GiziGo",s,s,s,q==null?s:q.en(B.B,B.a0),s,s),B.b9,A.Z("Pantau Gizi, Hidup Makin Hepi!",s,s,s,A.j(a).p2.z,s,s),B.kr,B.M7,B.nN,A.Z("Didukung oleh:",s,s,s,A.j(a).p2.Q,s,s),B.bQ,A.b6(A.a([A.mg("assets/images/ub_logo.png",new A.apo(),50,s),B.a7k,A.mg("assets/images/ai_center_logo.png",new A.app(),50,s)],p),B.q,B.dw,B.n),B.ef],p),B.q,B.o,B.n),B.aC,!0),s)}}
 A.apl.prototype={
 $1(a){return B.a41},
