@@ -101,6 +101,11 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "assets/images/gizi_go_logo.png"
+  image_path: "assets/images/Logo_Fix.png"
   adaptive_icon_background: "#F5F5F5"
-  adaptive_icon_foreground: "assets/images/gizi_go_logo.png"
+  adaptive_icon_foreground: "assets/images/Logo_Fix.png"
+  web:
+    generate: true
+    image_path: "assets/images/Logo_Fix.png"
+    background_color: "#0D47A1"
+    theme_color: "#0D47A1"
