@@ -6,9 +6,47 @@ import '../detail_kebutuhan/detail_kebutuhan_screen.dart';
 import '../scan/scan_screen.dart';
 import '../rekomendasi/rekomendasi_screen.dart';
 import '../challenge/challenge_screen.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  final List<GlobalKey>? extraKeys;
+  const HomeScreen({super.key, this.extraKeys});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey _greetKey = GlobalKey();
+  final GlobalKey _needsKey = GlobalKey();
+  final GlobalKey _scanKey = GlobalKey();
+  final GlobalKey _challengeKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkTutorial();
+    });
+  }
+
+  Future<void> _checkTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Use a unique key for this tutorial version
+    final seen = prefs.getBool('tutorial_seen_v1') ?? false;
+    
+    if (!seen && mounted) {
+      // Start showcase
+      List<GlobalKey> keys = [_greetKey, _needsKey, _scanKey, _challengeKey];
+      if (widget.extraKeys != null) {
+        keys.addAll(widget.extraKeys!);
+      }
+      ShowCaseWidget.of(context).startShowCase(keys);
+      // Mark as seen
+      await prefs.setBool('tutorial_seen_v1', true);
+    }
+  }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -35,113 +73,123 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header with greeting
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _getGreeting(),
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                  color: AppTheme.textLight,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            profile.name ?? 'Sobat Sehat',
-                            style: Theme.of(context).textTheme.displayMedium,
-                          ),
-                        ],
+              Showcase(
+                key: _greetKey,
+                title: 'Halo Bestie!',
+                description: 'Ini halaman utama kamu, tempat mantau semua progres sehatmu.',
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _getGreeting(),
+                              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                    color: AppTheme.textLight,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              profile.name ?? 'Sobat Sehat',
+                              style: Theme.of(context).textTheme.displayMedium,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Image.asset(
-                      'assets/images/menyapa_rb.png',
-                      height: 110,
-                    ),
-                  ],
+                      Image.asset(
+                        'assets/images/menyapa_rb.png',
+                        height: 110,
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
               // Nutritional needs summary card
-              Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Kebutuhan Gizi Harian',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const DetailKebutuhanScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text('Detail'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildNutrientItem(
-                              context,
-                              'Kalori',
-                              '${needs.calories.toInt()}',
-                              'kcal',
-                              Icons.local_fire_department,
+              Showcase(
+                key: _needsKey,
+                title: 'Info Gizi Harian',
+                description: 'Pantau kebutuhan kalori dan nutrisimu di sini. Klik Detail buat lengkapnya!',
+                child: Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Kebutuhan Gizi Harian',
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildNutrientItem(
-                              context,
-                              'Protein',
-                              '${needs.protein.toInt()}',
-                              'g',
-                              Icons.egg,
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const DetailKebutuhanScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text('Detail'),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildNutrientItem(
-                              context,
-                              'Karbohidrat',
-                              '${needs.carbs.toInt()}',
-                              'g',
-                              Icons.breakfast_dining,
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildNutrientItem(
+                                context,
+                                'Kalori',
+                                '${needs.calories.toInt()}',
+                                'kcal',
+                                Icons.local_fire_department,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildNutrientItem(
-                              context,
-                              'Lemak',
-                              '${needs.fat.toInt()}',
-                              'g',
-                              Icons.water_drop,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildNutrientItem(
+                                context,
+                                'Protein',
+                                '${needs.protein.toInt()}',
+                                'g',
+                                Icons.egg,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildNutrientItem(
+                                context,
+                                'Karbohidrat',
+                                '${needs.carbs.toInt()}',
+                                'g',
+                                Icons.breakfast_dining,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildNutrientItem(
+                                context,
+                                'Lemak',
+                                '${needs.fat.toInt()}',
+                                'g',
+                                Icons.water_drop,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -152,16 +200,21 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const ScanScreen()),
-                          );
-                        },
-                        icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
-                        label: const Text('Scan Jajanan'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Showcase(
+                        key: _scanKey,
+                        title: 'Scan Jajanan',
+                        description: 'Penasaran sama gizi jajanan lu? Foto aja di sini!',
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ScanScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                          label: const Text('Scan Jajanan'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
                         ),
                       ),
                     ),
@@ -185,131 +238,136 @@ class HomeScreen extends StatelessWidget {
               ),
 
               // Challenge card
-              Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ChallengeScreen()),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.emoji_events,
-                                    color: AppTheme.primaryOrange,
-                                    size: 28,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Tantangan 7 Hari Sehat',
-                                      style: Theme.of(context).textTheme.headlineMedium,
-                                      overflow: TextOverflow.ellipsis,
+              Showcase(
+                key: _challengeKey,
+                title: 'Tantangan Mingguan',
+                description: 'Ikuti tantangan seru buat jaga pola makan sehatmu!',
+                child: Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ChallengeScreen()),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.emoji_events,
+                                      color: AppTheme.primaryOrange,
+                                      size: 28,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const ChallengeScreen()),
-                                );
-                              },
-                              icon: Icon(
-                                Icons.arrow_forward_ios,
-                                color: AppTheme.primaryOrange,
-                                size: 20,
-                              ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Text(
-                              'Progress: ',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            Text(
-                              '${challenge.currentStreak}/7',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    color: AppTheme.primaryOrange,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        // Progress dots
-                        Row(
-                          children: List.generate(7, (index) {
-                            final isCompleted = index < challenge.currentStreak;
-                            return Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: isCompleted
-                                    ? AppTheme.accentGold
-                                    : AppTheme.cardGray,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isCompleted
-                                      ? AppTheme.accentGold
-                                      : AppTheme.textLight.withOpacity(0.3),
-                                  width: 2,
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Tantangan 7 Hari Sehat',
+                                        style: Theme.of(context).textTheme.headlineMedium,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: isCompleted
-                                  ? const Icon(Icons.check, color: Colors.white, size: 20)
-                                  : Text(
-                                      '${index + 1}',
-                                      style: TextStyle(
-                                        color: AppTheme.textLight,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => const ChallengeScreen()),
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: AppTheme.primaryOrange,
+                                  size: 20,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Text(
+                                'Progress: ',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              Text(
+                                '${challenge.currentStreak}/7',
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      color: AppTheme.primaryOrange,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Icon(
-                              challenge.todayScanned
-                                  ? Icons.check_circle
-                                  : Icons.radio_button_unchecked,
-                              color: challenge.todayScanned
-                                  ? AppTheme.accentGold
-                                  : AppTheme.textLight,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              challenge.todayScanned
-                                  ? 'Sudah scan hari ini'
-                                  : 'Belum scan hari ini',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          // Progress dots
+                          Row(
+                            children: List.generate(7, (index) {
+                              final isCompleted = index < challenge.currentStreak;
+                              return Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: isCompleted
+                                      ? AppTheme.accentGold
+                                      : AppTheme.cardGray,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isCompleted
+                                        ? AppTheme.accentGold
+                                        : AppTheme.textLight.withOpacity(0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: isCompleted
+                                    ? const Icon(Icons.check, color: Colors.white, size: 20)
+                                    : Text(
+                                        '${index + 1}',
+                                        style: TextStyle(
+                                          color: AppTheme.textLight,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Icon(
+                                challenge.todayScanned
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                color: challenge.todayScanned
+                                    ? AppTheme.accentGold
+                                    : AppTheme.textLight,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                challenge.todayScanned
+                                    ? 'Sudah scan hari ini'
+                                    : 'Belum scan hari ini',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -374,4 +432,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-

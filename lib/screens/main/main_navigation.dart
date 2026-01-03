@@ -7,6 +7,8 @@ import '../riwayat/riwayat_screen.dart';
 import '../challenge/challenge_screen.dart';
 import '../profil/profil_screen.dart';
 
+import 'package:showcaseview/showcaseview.dart';
+
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
 
@@ -17,22 +19,46 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const ScanScreen(),
-    const RekomendasiScreen(),
-    const RiwayatScreen(),
-    const ChallengeScreen(),
-    const ProfilScreen(),
-  ];
+  // Keys for Navbar Showcase
+  final GlobalKey _keyHomeNav = GlobalKey();
+  final GlobalKey _keyScanNav = GlobalKey();
+  final GlobalKey _keyRekomNav = GlobalKey();
+  final GlobalKey _keyHistoryNav = GlobalKey();
+  final GlobalKey _keyChallengeNav = GlobalKey();
+  final GlobalKey _keyProfileNav = GlobalKey();
+
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HomeScreen(
+        extraKeys: [
+          _keyHomeNav,
+          _keyScanNav,
+          _keyRekomNav,
+          _keyHistoryNav,
+          _keyChallengeNav,
+          _keyProfileNav
+        ],
+      ),
+      const ScanScreen(),
+      const RekomendasiScreen(),
+      const RiwayatScreen(),
+      const ChallengeScreen(),
+      const ProfilScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+    return ShowCaseWidget(
+      builder: (context) => Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -41,39 +67,70 @@ class _MainNavigationState extends State<MainNavigation> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: Showcase(
+              key: _keyHomeNav,
+              title: 'Beranda',
+              description: 'Balik ke halaman utama kapan aja.',
+              child: const Icon(Icons.home),
+            ),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code_scanner_outlined),
-            activeIcon: Icon(Icons.qr_code_scanner),
+            icon: Showcase(
+              key: _keyScanNav,
+              title: 'Scan',
+              description: 'Jalan pintas buat scan makananmu!',
+              child: const Icon(Icons.qr_code_scanner_outlined),
+            ),
+            activeIcon: const Icon(Icons.qr_code_scanner),
             label: 'Scan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant_menu_outlined),
-            activeIcon: Icon(Icons.restaurant_menu),
+            icon: Showcase(
+              key: _keyRekomNav,
+              title: 'Menu Sehat',
+              description: 'Cari rekomendasi makanan sehat di sini.',
+              child: const Icon(Icons.restaurant_menu_outlined),
+            ),
+            activeIcon: const Icon(Icons.restaurant_menu),
             label: 'Rekomendasi',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            activeIcon: Icon(Icons.history),
+            icon: Showcase(
+              key: _keyHistoryNav,
+              title: 'Riwayat',
+              description: 'Cek lagi apa aja yang udah kamu makan.',
+              child: const Icon(Icons.history_outlined),
+            ),
+            activeIcon: const Icon(Icons.history),
             label: 'Riwayat',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            activeIcon: Icon(Icons.emoji_events),
+            icon: Showcase(
+              key: _keyChallengeNav,
+              title: 'Tantangan',
+              description: 'Liat progres tantangan mingguanmu.',
+              child: const Icon(Icons.emoji_events_outlined),
+            ),
+            activeIcon: const Icon(Icons.emoji_events),
             label: 'Tantangan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+            icon: Showcase(
+              key: _keyProfileNav,
+              title: 'Profil Kamu',
+              description: 'Atur data diri dan preferensimu di sini.',
+              child: const Icon(Icons.person_outline),
+            ),
+            activeIcon: const Icon(Icons.person),
             label: 'Profil',
           ),
         ],
       ),
+    ),
     );
   }
 }
