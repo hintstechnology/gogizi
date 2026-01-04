@@ -108,7 +108,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             _buildSummaryCards(),
             const SizedBox(height: 24),
             Text(
-              'Daftar Mahasiswa Terdaftar',
+              'Daftar Anak Muda Terdaftar',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

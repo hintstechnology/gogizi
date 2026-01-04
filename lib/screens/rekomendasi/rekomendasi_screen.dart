@@ -249,6 +249,36 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
               childCount: _currentRecommendations.length,
             ),
           ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.cardGray,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: AppTheme.textLight, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Disclaimer: Rekomendasi di atas diasumsikan untuk individu sehat tanpa kondisi medis khusus (seperti diabetes, hipertensi, maag, gangguan ginjal, dll). Jika Anda memiliki kondisi medis tertentu, konsultasikan dengan dokter atau ahli gizi.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppTheme.textLight,
+                              fontStyle: FontStyle.italic,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

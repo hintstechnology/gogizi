@@ -326,6 +326,30 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
                     _buildNutrientRow('Gula', '${result.nutritionalInfo.sugar.toInt()} g'),
                     _buildNutrientRow('Serat', '${result.nutritionalInfo.fiber.toInt()} g'),
                     _buildNutrientRow('Natrium', '${result.nutritionalInfo.sodium.toInt()} mg'),
+                    
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.backgroundLightOrange,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 16, color: AppTheme.textLight),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Angka di atas adalah estimasi dari resep standar. Kandungan asli bisa beda, tergantung "tangan koki"-nya ya (minyak, gula, garam, dsb)! 😉',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontStyle: FontStyle.italic,
+                                color: AppTheme.textLight,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

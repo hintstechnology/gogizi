@@ -88,9 +88,9 @@ class UserProfile {
   static UserProfile get dummyProfile {
     return UserProfile(
       id: 'user_001',
-      email: 'mahasiswa@example.com',
+      email: 'anakmuda@example.com',
       phoneNumber: '081234567890',
-      name: 'Mahasiswa Sehat',
+      name: 'Anak Muda Sehat',
       age: 20,
       gender: Gender.male,
       height: 170.0,
