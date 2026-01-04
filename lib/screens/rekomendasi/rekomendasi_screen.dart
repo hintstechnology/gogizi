@@ -249,7 +249,7 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
               childCount: _currentRecommendations.length,
             ),
           ),
-          ),
+
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
