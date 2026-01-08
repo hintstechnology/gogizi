@@ -114,14 +114,15 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
         return;
+      }
+
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
 
-        // Navigate to main app
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigation()),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email atau password salah!')),
         );
       }
     }
@@ -245,9 +246,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                // Login button
+                // Login button (Email/Pass -> Admin Login)
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
+                  onPressed: _isLoading ? null : _adminLogin,
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
@@ -276,13 +277,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 16),
 
-                // Google login button (placeholder)
+                // Google login button
                 OutlinedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Login dengan Google (Coming Soon)')),
-                    );
-                  },
+                  onPressed: _isLoading ? null : _login,
                   icon: const Icon(Icons.g_mobiledata, size: 24),
                   label: const Text('Masuk dengan Google'),
                 ),

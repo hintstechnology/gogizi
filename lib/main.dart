@@ -59,7 +59,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-    final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+    
+    // Check Supabase Session
+    final session = Supabase.instance.client.auth.currentSession;
+    final isLoggedIn = session != null;
 
     if (!mounted) return;
 
