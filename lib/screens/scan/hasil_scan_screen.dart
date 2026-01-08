@@ -7,26 +7,33 @@ import '../rekomendasi/rekomendasi_screen.dart';
 
 class HasilScanScreen extends StatefulWidget {
   final String imagePath;
+  final String? prediction;
 
-  const HasilScanScreen({super.key, required this.imagePath});
+  const HasilScanScreen({
+    super.key, 
+    required this.imagePath,
+    this.prediction,
+  });
 
   @override
   State<HasilScanScreen> createState() => _HasilScanScreenState();
 }
 
 class _HasilScanScreenState extends State<HasilScanScreen> {
-  // Predefined food list
+  // Predefined food list matching model classes
   final List<String> _foodOptions = [
+    'Air dan sejenisnya',
     'Bakso',
-    'Cimol',
-    'Seblak',
-    'Telur Gulung',
-    'Tempura',
     'Batagor',
-    'Air',
-    'Es Teh',
-    'Thai Tea',
+    'Cimol atau cilok',
+    'Es teh',
+    'Mie instan',
     'Minuman botol',
+    'Seblak',
+    'Sosis bakar atau goreng',
+    'Telur gulung',
+    'Tempura',
+    'Thai tea',
   ];
 
   String? _selectedFood;
@@ -36,8 +43,12 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
   @override
   void initState() {
     super.initState();
-    // Simulate prediction (default to first or random)
-    _selectedFood = _foodOptions[3]; // Default to 'Telur Gulung' for now
+    // Use prediction if available, otherwise default to first or null
+    if (widget.prediction != null && _foodOptions.contains(widget.prediction)) {
+      _selectedFood = widget.prediction;
+    } else {
+      _selectedFood = _foodOptions[0];
+    }
   }
 
   // Generate result based on selected food
@@ -53,17 +64,18 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
     NutritionalInfo nutritionalInfo;
     
     // Simple mock data mapping
+    // Map labels to nutritional info
     switch (label) {
       case 'Bakso':
         nutritionalInfo = NutritionalInfo(calories: 320, protein: 18, carbs: 45, fat: 8, sugar: 2, fiber: 2, sodium: 650);
         break;
-      case 'Cimol':
+      case 'Cimol atau cilok':
         nutritionalInfo = NutritionalInfo(calories: 250, protein: 2, carbs: 55, fat: 12, sugar: 0, fiber: 1, sodium: 300);
         break;
       case 'Seblak':
         nutritionalInfo = NutritionalInfo(calories: 450, protein: 12, carbs: 50, fat: 22, sugar: 4, fiber: 3, sodium: 900);
         break;
-      case 'Telur Gulung':
+      case 'Telur gulung':
         nutritionalInfo = NutritionalInfo(calories: 150, protein: 6, carbs: 8, fat: 10, sugar: 0, fiber: 0, sodium: 200);
         break;
       case 'Tempura':
@@ -72,17 +84,23 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
       case 'Batagor':
          nutritionalInfo = NutritionalInfo(calories: 380, protein: 14, carbs: 35, fat: 20, sugar: 5, fiber: 2, sodium: 550);
          break;
-      case 'Air':
+      case 'Air dan sejenisnya':
          nutritionalInfo = NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
          break;
-      case 'Es Teh':
+      case 'Es teh':
          nutritionalInfo = NutritionalInfo(calories: 90, protein: 0, carbs: 22, fat: 0, sugar: 22, fiber: 0, sodium: 10);
          break;
-      case 'Thai Tea':
+      case 'Thai tea':
          nutritionalInfo = NutritionalInfo(calories: 220, protein: 4, carbs: 35, fat: 8, sugar: 30, fiber: 0, sodium: 40);
          break;
       case 'Minuman botol':
          nutritionalInfo = NutritionalInfo(calories: 140, protein: 0, carbs: 35, fat: 0, sugar: 35, fiber: 0, sodium: 20);
+         break;
+      case 'Mie instan':
+         nutritionalInfo = NutritionalInfo(calories: 380, protein: 8, carbs: 50, fat: 16, sugar: 2, fiber: 2, sodium: 1200);
+         break;
+      case 'Sosis bakar atau goreng':
+         nutritionalInfo = NutritionalInfo(calories: 280, protein: 10, carbs: 5, fat: 25, sugar: 1, fiber: 0, sodium: 800);
          break;
       default:
         nutritionalInfo = NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
@@ -91,7 +109,7 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
     RiskAnalysis riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);
     
     // Custom logic for water
-    if (label == 'Air') {
+    if (label == 'Air dan sejenisnya') {
         riskAnalysis = RiskAnalysis(
             risks: [],
             warnings: ['Tetap jaga hidrasi tubuh!'],
