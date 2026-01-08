@@ -42,6 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         // kIsWeb is true for Web: use clientId. 
         // kIsWeb is false for Android: use serverClientId (to get ID Token for Supabase).
+        // ADDED SCOPES TO FORCE ID TOKEN GENERATION
+        scopes: ['email', 'profile', 'openid'],
         clientId: kIsWeb ? webClientId : null, 
         serverClientId: kIsWeb ? null : webClientId, 
       );
@@ -573,6 +575,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                 ),
                 
+                const SizedBox(height: 16),
+                
+                // Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: AppTheme.textLight.withOpacity(0.3))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'atau',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                    Expanded(child: Divider(color: AppTheme.textLight.withOpacity(0.3))),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Google register button (Redirects to Login because Google Auth handles both)
+                OutlinedButton.icon(
+                  onPressed: () {
+                    // Google Sign In is same as Sign Up. 
+                    // We can just pop back to login and trigger login, 
+                    // or implement the same logic here. 
+                    // For simplicity, let's pop and show message to use login page for Google.
+                    // OR better: copy the _login logic here?
+                    // Best practice: Google Button is usually just "Continue with Google".
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Silakan gunakan tombol Google di halaman Masuk.')),
+                    );
+                  },
+                  icon: const Icon(Icons.g_mobiledata, size: 24),
+                  label: const Text('Daftar dengan Google'),
+                ),
+
                 const SizedBox(height: 32),
               ],
             ),
