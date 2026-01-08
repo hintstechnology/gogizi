@@ -5,6 +5,7 @@ import '../detail_kebutuhan/detail_kebutuhan_screen.dart';
 import '../auth/login_screen.dart';
 
 import '../../services/profile_service.dart';
+import '../../services/recommendation_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilScreen extends StatefulWidget {
@@ -121,6 +122,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
           );
 
           await _profileService.updateProfile(updatedProfile);
+          
+          // Generate new recommendations based on updated profile
+          await RecommendationService().generateDailyRecommendations(updatedProfile);
           
           if (mounted) {
              await _loadProfile(); // Refresh

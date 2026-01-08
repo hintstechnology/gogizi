@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../services/recommendation_service.dart';
+import '../../services/profile_service.dart';
+import '../../models/food_library_item.dart';
 
 class RekomendasiScreen extends StatefulWidget {
   const RekomendasiScreen({super.key});
@@ -9,108 +12,62 @@ class RekomendasiScreen extends StatefulWidget {
 }
 
 class _RekomendasiScreenState extends State<RekomendasiScreen> {
-  // Master list of recommendations
-  final List<MenuRecommendation> _allRecommendations = [
-    MenuRecommendation(
-      name: 'Nasi Uduk + Ayam Goreng + Sayur',
-      calories: 450,
-      protein: 25,
-      carbs: 50,
-      fat: 15,
-      reason: 'Seimbang antara karbohidrat, protein, dan serat. Cocok untuk makan siang.',
-      price: 'Rp 15.000',
-    ),
-    MenuRecommendation(
-      name: 'Gado-gado',
-      calories: 280,
-      protein: 15,
-      carbs: 30,
-      fat: 12,
-      reason: 'Tinggi serat, rendah kalori, kaya vitamin dari sayuran segar.',
-      price: 'Rp 12.000',
-    ),
-    MenuRecommendation(
-      name: 'Sate Ayam + Lontong',
-      calories: 380,
-      protein: 28,
-      carbs: 35,
-      fat: 12,
-      reason: 'Tinggi protein, cocok untuk pemulihan otot setelah aktivitas.',
-      price: 'Rp 18.000',
-    ),
-    MenuRecommendation(
-      name: 'Salad Buah + Yogurt',
-      calories: 200,
-      protein: 8,
-      carbs: 35,
-      fat: 5,
-      reason: 'Rendah kalori, tinggi serat, cocok untuk camilan sehat.',
-      price: 'Rp 10.000',
-    ),
-    MenuRecommendation(
-      name: 'Bubur Ayam',
-      calories: 320,
-      protein: 18,
-      carbs: 45,
-      fat: 8,
-      reason: 'Mudah dicerna, cocok untuk sarapan atau makan malam.',
-      price: 'Rp 12.000',
-    ),
-    MenuRecommendation(
-      name: 'Soto Ayam + Nasi',
-      calories: 400,
-      protein: 22,
-      carbs: 45,
-      fat: 15,
-      reason: 'Kuah hangat menyegarkan, sumber protein dan karbohidrat yang baik.',
-      price: 'Rp 15.000',
-    ),
-    MenuRecommendation(
-      name: 'Ketoprak',
-      calories: 380,
-      protein: 12,
-      carbs: 45,
-      fat: 14,
-      reason: 'Alternatif menu berbasis tahu dan bihun dengan bumbu kacang.',
-      price: 'Rp 14.000',
-    ),
-    MenuRecommendation(
-      name: 'Mie Ayam + Pangsit',
-      calories: 420,
-      protein: 18,
-      carbs: 55,
-      fat: 12,
-      reason: 'Menu populer yang mengenyangkan, dengan topping ayam cincang.',
-      price: 'Rp 13.000',
-    ),
-    MenuRecommendation(
-      name: 'Capcay Kuah/Goreng',
-      calories: 250,
-      protein: 10,
-      carbs: 15,
-      fat: 12,
-      reason: 'Penuh dengan aneka sayuran, kaya serat dan vitamin.',
-      price: 'Rp 15.000',
-    ),
-  ];
-
-  List<MenuRecommendation> _currentRecommendations = [];
+  Map<String, FoodLibraryItem>? _recommendations;
+  bool _isLoading = true;
+  final RecommendationService _recommendationService = RecommendationService();
+  final ProfileService _profileService = ProfileService();
 
   @override
   void initState() {
     super.initState();
-    _regenerateRecommendations();
+    _loadRecommendations();
   }
 
-  void _regenerateRecommendations() {
-    setState(() {
-      final shuffled = List<MenuRecommendation>.from(_allRecommendations)..shuffle();
-      _currentRecommendations = shuffled.take(3).toList();
-    });
+  Future<void> _loadRecommendations() async {
+    setState(() => _isLoading = true);
+    try {
+      var recs = await _recommendationService.getRecommendations();
+      
+      // If no recommendations exist for today, try to generate automatic
+      if (recs == null) {
+        final profile = await _profileService.getUserProfile();
+        if (profile != null) {
+          await _recommendationService.generateDailyRecommendations(profile);
+          recs = await _recommendationService.getRecommendations();
+        }
+      }
+      
+      if (mounted) {
+        setState(() {
+          _recommendations = recs;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _regenerateRecommendations() async {
+    setState(() => _isLoading = true);
+    final profile = await _profileService.getUserProfile();
+    if (profile != null) {
+       await _recommendationService.generateDailyRecommendations(profile);
+       await _loadRecommendations();
+    } else {
+       if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final recs = _recommendations;
+    final meals = recs != null ? ['breakfast', 'lunch', 'dinner'] : [];
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
       appBar: AppBar(
@@ -199,56 +156,73 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
               ),
             ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final menu = _currentRecommendations[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            menu.name,
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            menu.reason,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              _buildMacroChip('Kal', '${menu.calories}'),
-                              const SizedBox(width: 8),
-                              _buildMacroChip('P', '${menu.protein}g'),
-                              const SizedBox(width: 8),
-                              _buildMacroChip('K', '${menu.carbs}g'),
-                              const SizedBox(width: 8),
-                              _buildMacroChip('L', '${menu.fat}g'),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Estimasi: ${menu.price}',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  color: AppTheme.accentGold,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ],
+          
+          if (recs == null)
+             SliverFillRemaining(
+               child: Center(
+                 child: Text('Belum ada rekomendasi. Klik tombol di atas!'),
+               ),
+             )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final key = meals[index];
+                  final menu = recs[key]!;
+                  final title = key == 'breakfast' ? 'Sarapan' : (key == 'lunch' ? 'Makan Siang' : 'Makan Malam');
+                  
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryOrange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                title, 
+                                style: TextStyle(color: AppTheme.primaryOrange, fontWeight: FontWeight.bold)
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              menu.name,
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            // Description is optional in FoodLibraryItem, use category or generic text
+                            Text(
+                              'Menu sehat pilihan untukmu.',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                _buildMacroChip('Kal', '${menu.calories}'),
+                                const SizedBox(width: 8),
+                                _buildMacroChip('P', '${menu.protein}g'),
+                                const SizedBox(width: 8),
+                                _buildMacroChip('K', '${menu.carbs}g'),
+                                const SizedBox(width: 8),
+                                _buildMacroChip('L', '${menu.fat}g'),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-              childCount: _currentRecommendations.length,
+                  );
+                },
+                childCount: meals.length,
+              ),
             ),
-          ),
+
 
           SliverToBoxAdapter(
             child: Padding(

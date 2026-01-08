@@ -5,6 +5,10 @@ import '../../theme/app_theme.dart';
 import '../../models/scan_result.dart';
 import '../rekomendasi/rekomendasi_screen.dart';
 
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class HasilScanScreen extends StatefulWidget {
   final String imagePath;
   final String? prediction;
@@ -38,7 +42,67 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
 
   String? _selectedFood;
   bool _isConfirmed = false;
+  bool _isSaving = false;
   ScanResult? _result;
+
+  Future<void> _saveToHistory() async {
+    if (_result == null) return;
+    
+    setState(() => _isSaving = true);
+
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      String savedImagePath = widget.imagePath;
+
+      // Only move file if on Mobile (not Web)
+      if (!kIsWeb) {
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${path.basename(widget.imagePath)}';
+        final savedImage = await File(widget.imagePath).copy('${directory.path}/$fileName');
+        savedImagePath = savedImage.path;
+      }
+
+      // Insert to Supabase
+      // Assuming table 'food_logs' exists from schema
+      await Supabase.instance.client.from('food_logs').insert({
+        'user_id': user.id,
+        'food_name': _result!.label,
+        'image_local_path': savedImagePath, // Only path string
+        'calories': _result!.nutritionalInfo.calories,
+        'protein': _result!.nutritionalInfo.protein,
+        'carbs': _result!.nutritionalInfo.carbs,
+        'fat': _result!.nutritionalInfo.fat,
+        'is_sweet_drink': _result!.isSweetDrink,
+        'logged_at': DateTime.now().toIso8601String(),
+        'confidence_score': _result!.confidence,
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Berhasil disimpan ke riwayat!'),
+            backgroundColor: AppTheme.successGreen,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menyimpan: $e'),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
 
   @override
   void initState() {
@@ -516,17 +580,10 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      // Save to history
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Hasil scan disimpan ke riwayat'),
-                          backgroundColor: AppTheme.successGreen,
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    icon: const Icon(Icons.save_outlined),
+                    onPressed: _isSaving ? null : _saveToHistory,
+                    icon: _isSaving 
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) 
+                      : const Icon(Icons.save_outlined),
                     label: const Text('Simpan'),
                   ),
                 ),

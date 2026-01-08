@@ -84,6 +84,15 @@ class UserProfile {
     );
   }
 
+  // Check if profile has all necessary data for standard usage
+  bool get isComplete {
+    return age != null &&
+           height != null &&
+           weight != null &&
+           activityLevel != null &&
+           gender != null;
+  }
+
   // Dummy data
   static UserProfile get dummyProfile {
     return UserProfile(

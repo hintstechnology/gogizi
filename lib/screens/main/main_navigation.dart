@@ -8,6 +8,7 @@ import '../challenge/challenge_screen.dart';
 import '../profil/profil_screen.dart';
 
 import 'package:showcaseview/showcaseview.dart';
+import '../../services/profile_service.dart' as import_profile_service;
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -61,10 +62,37 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+        onTap: (index) async {
+          // Allow navigation to Home (0) and Profile (5) without check
+          // to prevent getting stuck if fetch fails.
+          if (index == 0 || index == 5) {
+            setState(() {
+              _currentIndex = index;
+            });
+            return;
+          }
+
+          // Check profile completeness for key features (Scan, Rekomendasi, etc)
+          // Showing loading indicator could be nice here, but snackbar sufficient for guard.
+          final profile = await import_profile_service.ProfileService().getUserProfile();
+          
+          if (profile == null || !profile.isComplete) {
+             if (mounted) {
+               ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(content: Text('Eits, lengkapi data profil dulu ya bestie!')),
+               );
+               // Redirect to Profile tab
+               setState(() {
+                 _currentIndex = 5; 
+               });
+             }
+          } else {
+             if (mounted) {
+               setState(() {
+                 _currentIndex = index;
+               });
+             }
+          }
         },
         type: BottomNavigationBarType.fixed,
         items: [

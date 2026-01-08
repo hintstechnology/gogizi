@@ -9,6 +9,7 @@ import '../challenge/challenge_screen.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/profile_service.dart';
+import '../profil/profil_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<GlobalKey>? extraKeys;
@@ -58,9 +59,37 @@ class _HomeScreenState extends State<HomeScreen> {
       if (widget.extraKeys != null) {
         keys.addAll(widget.extraKeys!);
       }
+      
+      // Start showcase and wait for it to finish (ShowCaseWidget doesn't have direct await, 
+      // but we can assume user interacts. 
+      // Ideally we use onFinish callback of ShowCaseWidget, but for now let's just trigger it).
       ShowCaseWidget.of(context).startShowCase(keys);
       // Mark as seen
       await prefs.setBool('tutorial_seen_v1', true);
+    } else {
+      // If tutorial already seen (or skipped), check profile completeness immediately
+       _checkProfileCompletion();
+    }
+  }
+
+  void _checkProfileCompletion() {
+    if (_userProfile != null && !_userProfile!.isComplete) {
+       // Add small delay to ensure UI built
+       Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+               const SnackBar(content: Text('Yuk isi data dirimu dulu biar bisa dihitung gizinya!')),
+             );
+             // Navigate to Profile screen (assuming it's index 3 or via push)
+             // Since we are in Home (tab 0), and Profile is likely another tab or screen.
+             // If we want to force it, we can push the screen.
+             // But better: User MainNavigation logic. 
+             // For now, let's push ProfileScreen directly on top.
+             Navigator.of(context).push(
+               MaterialPageRoute(builder: (_) => const ProfilScreen()),
+             ).then((_) => _loadProfile()); // Reload after return
+          }
+       });
     }
   }
 
@@ -77,17 +106,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Falls back to dummy only if load fails and result is null, or loading not finished
-    final profile = _userProfile ?? UserProfile.dummyProfile;
-    // Don't use dummy if we are just loading, show placeholders ideally.
-    // But for now, to avoid layout shift, using dummy as skeleton is okay-ish 
-    // IF we make it clear or if we just want it 'instant'.
-    // Better: Helper display name.
+    // Show skeleton if loading
+    if (_isLoading) {
+       return const Scaffold(
+         body: Center(child: CircularProgressIndicator()),
+       );
+    }
+
+    final profile = _userProfile; 
+    // If profile is null (fetch error), show basic fallback
+    final displayName = profile?.name ?? 'Sobat Sehat';
     
-    final displayName = _isLoading ? '...' : (profile.name ?? 'Sobat Sehat');
-    
-    final challenge = ChallengeStatus.dummy;
-    final needs = _isLoading ? NutritionalNeeds.dummy : (profile.nutritionalNeeds ?? NutritionalNeeds.calculate(profile));
+    // Use actual needs or null
+    final needs = profile != null && profile.nutritionalNeeds != null 
+        ? profile.nutritionalNeeds 
+        : (profile != null && profile.isComplete ? NutritionalNeeds.calculate(profile) : null);
+
+    // Challenge: Use empty/zero for now if no backend
+    final challenge = ChallengeStatus.empty; 
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
@@ -154,11 +190,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const DetailKebutuhanScreen(),
-                                  ),
-                                );
+                                if (profile != null && profile.isComplete) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const DetailKebutuhanScreen(),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Eits, isi data profil dulu ya bestie!')),
+                                  );
+                                  Navigator.of(context).push(
+                                     MaterialPageRoute(builder: (_) => const ProfilScreen()),
+                                  ).then((_) => _loadProfile());
+                                }
                               },
                               child: const Text('Detail'),
                             ),
@@ -171,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _buildNutrientItem(
                                 context,
                                 'Kalori',
-                                '${needs.calories.toInt()}',
+                                needs != null ? '${needs.calories.toInt()}' : '-',
                                 'kcal',
                                 Icons.local_fire_department,
                               ),
@@ -181,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _buildNutrientItem(
                                 context,
                                 'Protein',
-                                '${needs.protein.toInt()}',
+                                needs != null ? '${needs.protein.toInt()}' : '-',
                                 'g',
                                 Icons.egg,
                               ),
@@ -195,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _buildNutrientItem(
                                 context,
                                 'Karbohidrat',
-                                '${needs.carbs.toInt()}',
+                                needs != null ? '${needs.carbs.toInt()}' : '-',
                                 'g',
                                 Icons.breakfast_dining,
                               ),
@@ -205,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _buildNutrientItem(
                                 context,
                                 'Lemak',
-                                '${needs.fat.toInt()}',
+                                needs != null ? '${needs.fat.toInt()}' : '-',
                                 'g',
                                 Icons.water_drop,
                               ),
