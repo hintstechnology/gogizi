@@ -3,6 +3,9 @@ import '../../theme/app_theme.dart';
 import '../main/main_navigation.dart';
 import '../admin/admin_dashboard_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../models/user_profile.dart'; // Keep this for dummy admin logic if needed, or remove later
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +28,71 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 1. Google Sign In (Native)
+      //    We need to pass the WEB_CLIENT_ID to serverClientId for Supabase backend verification
+      const webClientId = '193416484480-mengsi06c0b25r00qqhb7u4pt7hdmv7t.apps.googleusercontent.com';
+      //    IOS/Android Client ID doesn't need to be passed here (handled by google-services.json usually, 
+      //    or for iOS explicit clientId). But google_sign_in usually auto-detects android config.
+      
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: webClientId,
+      );
+
+      final googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        // User canceled
+        setState(() { _isLoading = false; });
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw 'No ID Token found.';
+      }
+
+      // 2. Sign In to Supabase
+      final AuthResponse response = await Supabase.instance.client.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      if (response.user != null) {
+         // Login Success
+         if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainNavigation()),
+            );
+         }
+      }
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login Gagal: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Fallback for Admin Email Login (manual logic preserved)
+  Future<void> _adminLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -47,11 +114,6 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
         return;
-      }
-
-      // Simulate API call for normal users
-      await Future.delayed(const Duration(seconds: 1));
-
       if (mounted) {
         setState(() {
           _isLoading = false;
