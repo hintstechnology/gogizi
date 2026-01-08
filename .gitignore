@@ -93,3 +93,6 @@ app.*.map.json
 *.bak
 *~
 Thumbs.db
+
+# Database Schema
+supabase_schema.sql
