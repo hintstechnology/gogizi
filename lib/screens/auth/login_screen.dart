@@ -40,11 +40,10 @@ class _LoginScreenState extends State<LoginScreen> {
       const webClientId = '193416484480-mengsi06c0b25r00qqhb7u4pt7hdmv7t.apps.googleusercontent.com';
       
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        // kIsWeb is true for Web: use clientId. 
-        // kIsWeb is false for Android: use serverClientId (to get ID Token for Supabase).
-        // ADDED SCOPES TO FORCE ID TOKEN GENERATION
+        // PLAN B: For Web, DO NOT pass clientId. Let it use index.html meta tag.
+        // For Android/iOS, pass serverClientId.
         scopes: ['email', 'profile', 'openid'],
-        clientId: kIsWeb ? webClientId : null, 
+        // clientId: explicitly null to avoid conflicts on web
         serverClientId: kIsWeb ? null : webClientId, 
       );
 
