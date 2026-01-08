@@ -8,6 +8,7 @@ import '../rekomendasi/rekomendasi_screen.dart';
 import '../challenge/challenge_screen.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/profile_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<GlobalKey>? extraKeys;
@@ -23,12 +24,27 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _scanKey = GlobalKey();
   final GlobalKey _challengeKey = GlobalKey();
 
+  final ProfileService _profileService = ProfileService();
+  UserProfile? _userProfile;
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkTutorial();
     });
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final profile = await _profileService.getUserProfile();
+    if (mounted) {
+      setState(() {
+        _userProfile = profile;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _checkTutorial() async {
@@ -61,9 +77,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = UserProfile.dummyProfile;
+    // Falls back to dummy only if load fails and result is null, or loading not finished
+    final profile = _userProfile ?? UserProfile.dummyProfile;
+    // Don't use dummy if we are just loading, show placeholders ideally.
+    // But for now, to avoid layout shift, using dummy as skeleton is okay-ish 
+    // IF we make it clear or if we just want it 'instant'.
+    // Better: Helper display name.
+    
+    final displayName = _isLoading ? '...' : (profile.name ?? 'Sobat Sehat');
+    
     final challenge = ChallengeStatus.dummy;
-    final needs = profile.nutritionalNeeds!;
+    final needs = _isLoading ? NutritionalNeeds.dummy : (profile.nutritionalNeeds ?? NutritionalNeeds.calculate(profile));
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
@@ -94,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              profile.name ?? 'Sobat Sehat',
+                              displayName,
                               style: Theme.of(context).textTheme.displayMedium,
                             ),
                           ],

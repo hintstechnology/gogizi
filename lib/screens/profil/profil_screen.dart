@@ -4,6 +4,9 @@ import '../../models/user_profile.dart';
 import '../detail_kebutuhan/detail_kebutuhan_screen.dart';
 import '../auth/login_screen.dart';
 
+import '../../services/profile_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
 
@@ -24,25 +27,37 @@ class _ProfilScreenState extends State<ProfilScreen> {
   UserProfile? _profile;
   NutritionalNeeds? _calculatedNeeds;
 
+  final ProfileService _profileService = ProfileService();
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
     _loadProfile();
   }
 
-  void _loadProfile() {
-    final profile = UserProfile.dummyProfile;
-    setState(() {
-      _profile = profile;
-      _ageController.text = profile.age?.toString() ?? '';
-      _heightController.text = profile.height?.toString() ?? '';
-      _weightController.text = profile.weight?.toString() ?? '';
-      _phoneController.text = profile.phoneNumber ?? '';
-      _selectedGender = profile.gender;
-      _stressLevel = profile.stressLevel ?? 3;
-      _selectedActivityLevel = profile.activityLevel;
-      _calculatedNeeds = profile.nutritionalNeeds;
-    });
+  Future<void> _loadProfile() async {
+    setState(() => _isLoading = true);
+    final profile = await _profileService.getUserProfile();
+    if (mounted) {
+      setState(() {
+        _profile = profile;
+        if (profile != null) {
+          _ageController.text = profile.age?.toString() ?? '';
+          _heightController.text = profile.height?.toString() ?? '';
+          _weightController.text = profile.weight?.toString() ?? '';
+          _phoneController.text = profile.phoneNumber ?? '';
+          _selectedGender = profile.gender;
+          _stressLevel = profile.stressLevel ?? 3;
+          _selectedActivityLevel = profile.activityLevel;
+          // Calculate if data available
+          if (profile.age != null && profile.height != null && profile.weight != null) {
+             _calculatedNeeds =  NutritionalNeeds.calculate(profile);
+          }
+        }
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -89,21 +104,43 @@ class _ProfilScreenState extends State<ProfilScreen> {
     }
   }
 
-  void _saveProfile() {
-    if (_calculatedNeeds == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hitung dulu dong bestie!')),
-      );
-      return;
-    }
+  Future<void> _saveProfile() async {
+    if (_formKey.currentState!.validate()) {
+       setState(() => _isLoading = true);
+       try {
+          final updatedProfile = UserProfile(
+            name: _profile?.name, // Keep existing name
+            email: _profile?.email,
+            phoneNumber: _phoneController.text,
+            age: int.tryParse(_ageController.text),
+            gender: _selectedGender,
+            height: double.tryParse(_heightController.text),
+            weight: double.tryParse(_weightController.text),
+            stressLevel: _stressLevel,
+            activityLevel: _selectedActivityLevel,
+          );
 
-    // Simulate save
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profil berhasil disimpan! Mantul!'),
-        backgroundColor: AppTheme.successGreen,
-      ),
-    );
+          await _profileService.updateProfile(updatedProfile);
+          
+          if (mounted) {
+             await _loadProfile(); // Refresh
+             ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Profil berhasil disimpan! Mantul!'),
+                backgroundColor: AppTheme.successGreen,
+              ),
+            );
+          }
+       } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Gagal simpan: $e'), backgroundColor: AppTheme.errorRed),
+            );
+          }
+       } finally {
+         if (mounted) setState(() => _isLoading = false);
+       }
+    }
   }
 
   @override
@@ -478,12 +515,17 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
               // Logout Button
               OutlinedButton.icon(
-                onPressed: () {
-                  // Navigate to Login Screen and remove all previous routes
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (route) => false,
-                  );
+                onPressed: () async {
+                  // Logout from Supabase
+                  await Supabase.instance.client.auth.signOut();
+                  
+                  if (context.mounted) {
+                    // Navigate to Login Screen and remove all previous routes
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                    );
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.errorRed,
