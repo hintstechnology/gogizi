@@ -15,7 +15,7 @@ class RecommendationService {
       // 1. Fetch available food library
       // In a real app with limited RAM, we might fetch only a subset or use server-side function/edge function.
       // For now, assuming library < 1000 items, fetching all is okay.
-      final response = await _supabase.select('food_library'); // Fetch all columns
+      final response = await _supabase.from('food_library').select(); // Fetch all columns
       final List<FoodLibraryItem> foodLibrary = (response as List)
           .map((item) => FoodLibraryItem.fromJson(item))
           .toList();
