@@ -23,7 +23,7 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
         .from('food_logs')
         .stream(primaryKey: ['id'])
         .eq('user_id', user.id)
-        .order('logged_at', ascending: false)
+        .order('created_at', ascending: false)
         .map((data) => data.map((row) => _mapDbRowToScanResult(row)).toList());
   }
 
@@ -54,8 +54,8 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
       confidence: 1.0, 
       category: category,
       nutritionalInfo: nutritionalInfo,
-      scannedAt: DateTime.parse(row['logged_at']),
-      imagePath: row['image_local_path'],
+      scannedAt: DateTime.parse(row['created_at']),
+      imagePath: row['image_path'],
       isSweetDrink: isSweetDrink,
       riskAnalysis: riskAnalysis,
       healthierAlternatives: alternatives,

@@ -71,13 +71,13 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
       await Supabase.instance.client.from('food_logs').insert({
         'user_id': user.id,
         'food_name': _result!.label,
-        'image_local_path': savedImagePath, // Only path string
+        'image_path': savedImagePath, // Only path string
         'calories': _result!.nutritionalInfo.calories,
         'protein': _result!.nutritionalInfo.protein,
         'carbs': _result!.nutritionalInfo.carbs,
         'fat': _result!.nutritionalInfo.fat,
         'is_sweet_drink': _result!.isSweetDrink,
-        'logged_at': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
       });
 
       if (mounted) {

@@ -140,10 +140,10 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'Disusun dengan Algoritma Genetika 4 Sehat 5 Sempurna',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
+                          const Text(
+                            'Disusun pakai AI sesuai spesifikasi kebutuhan gizimu',
+                            style: TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
                       ],
                     ),
                   ),
@@ -209,73 +209,97 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
     required String time,
   }) {
     double totalCal = items.fold(0, (sum, i) => sum + i.calories);
+    double totalPro = items.fold(0, (sum, i) => sum + i.protein);
+    double totalCarb = items.fold(0, (sum, i) => sum + i.carbs);
+    double totalFat = items.fold(0, (sum, i) => sum + i.fat);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(20),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${totalCal.toStringAsFixed(0)} kkal',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              Text(
+                time,
+                style: TextStyle(color: Colors.grey[500], fontSize: 13),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          time,
-          style: TextStyle(color: Colors.grey[500], fontSize: 13),
-        ),
-        const SizedBox(height: 12),
-        
-        if (items.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text('Data menu belum lengkap'),
-          )
-        else
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: items.map((item) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: SizedBox(
-                    width: 160,
-                    height: 230,
-                    child: ProductCard(
-                      title: '${item.name} ${item.portionDesc != null ? "(${item.portionDesc})" : ""}',
-                      price: '${item.calories.round()} kkal',
-                      image: 'https://placehold.co/150x150/png?text=Menu', 
-                      backgroundColor: const Color(0xFFF5F5F5),
-                      onTap: () {
-                        // Show details
-                      },
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
+            ],
           ),
-      ],
+          const SizedBox(height: 12),
+          
+          if (items.isEmpty)
+            const Text('Menu belum tersedia')
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Expanded(
+                      child: Text(
+                        '${item.name} ${item.portionDesc != null ? "(${item.portionDesc})" : ""}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              )).toList(),
+            ),
+            
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+          
+          // Nutrition Summary Grid
+          Row(
+            children: [
+              _buildNutrientInfo('Kalori', '${totalCal.round()}', 'kcal', Colors.orange),
+              _buildNutrientInfo('Protein', '${totalPro.round()}', 'g', Colors.blue),
+              _buildNutrientInfo('Karbo', '${totalCarb.round()}', 'g', Colors.brown),
+              _buildNutrientInfo('Lemak', '${totalFat.round()}', 'g', Colors.yellow[800]!),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNutrientInfo(String label, String value, String unit, Color color) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value, 
+                style: TextStyle(
+                  fontSize: 14, 
+                  fontWeight: FontWeight.bold,
+                  color: color
+                )
+              ),
+              Text(unit, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+            ],
+          )
+        ],
+      ),
     );
   }
 }

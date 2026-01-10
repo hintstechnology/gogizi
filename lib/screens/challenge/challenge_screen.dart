@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme/app_theme.dart';
 import '../../models/challenge_status.dart';
 
@@ -14,57 +15,90 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
   ChallengeStatus _challenge = ChallengeStatus.dummy;
   bool _autoReset = true;
 
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
-    _autoReset = _challenge.autoResetOnSweetDrink;
+    _fetchChallengeData();
+  }
+
+  Future<void> _fetchChallengeData() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    // 7 Day Challenge: Last 6 days + Today
+    final startOfWindow = today.subtract(const Duration(days: 6));
+
+    try {
+      final response = await supabase
+          .from('food_logs')
+          .select('created_at, is_sweet_drink')
+          .eq('user_id', user.id)
+          .gte('created_at', startOfWindow.toIso8601String());
+      
+      final logs = (response as List).map((e) => {
+        'date': DateTime.parse(e['created_at']).toLocal(),
+        'isSweetDrink': e['is_sweet_drink'] ?? false,
+      }).toList();
+
+      Map<int, DayStatus> dailyStatus = {};
+      int completedDays = 0;
+
+      for (int i = 0; i < 7; i++) {
+        final targetDate = startOfWindow.add(Duration(days: i));
+        final dayLogs = logs.where((log) {
+          final logDate = log['date'] as DateTime;
+          return logDate.year == targetDate.year && 
+                 logDate.month == targetDate.month && 
+                 logDate.day == targetDate.day;
+        }).toList();
+
+        bool scanned = dayLogs.isNotEmpty;
+        bool hasSweetDrink = dayLogs.any((l) => l['isSweetDrink'] == true);
+        
+        // Logic: Complted if scanned. Sweet drink is just a warning unless auto-reset is on?
+        // Let's assume completed if scanned.
+        bool completed = scanned;
+
+        dailyStatus[i + 1] = DayStatus(
+          day: i + 1,
+          completed: completed,
+          scanned: scanned,
+          hasSweetDrink: hasSweetDrink
+        );
+
+        if (completed) completedDays++;
+      }
+
+      if (mounted) {
+        setState(() {
+          _challenge = ChallengeStatus(
+            startDate: startOfWindow,
+            currentStreak: completedDays,
+            dailyStatus: dailyStatus,
+            achievements: [], // Would need separate table for achievements
+            isActive: true,
+            autoResetOnSweetDrink: _autoReset,
+          );
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching challenge data: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _startChallenge() {
-    setState(() {
-      _challenge = ChallengeStatus(
-        startDate: DateTime.now(),
-        currentStreak: 0,
-        dailyStatus: {
-          1: DayStatus(day: 1, completed: false, scanned: false, hasSweetDrink: false),
-          2: DayStatus(day: 2, completed: false, scanned: false, hasSweetDrink: false),
-          3: DayStatus(day: 3, completed: false, scanned: false, hasSweetDrink: false),
-          4: DayStatus(day: 4, completed: false, scanned: false, hasSweetDrink: false),
-          5: DayStatus(day: 5, completed: false, scanned: false, hasSweetDrink: false),
-          6: DayStatus(day: 6, completed: false, scanned: false, hasSweetDrink: false),
-          7: DayStatus(day: 7, completed: false, scanned: false, hasSweetDrink: false),
-        },
-        achievements: [],
-        isActive: true,
-        autoResetOnSweetDrink: _autoReset,
-      );
-    });
+    _fetchChallengeData();
   }
 
   void _resetChallenge() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Tantangan?'),
-        content: const Text('Apakah kamu yakin ingin mereset tantangan? Progress bakal hilang.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _startChallenge();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorRed,
-            ),
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
-    );
+     _fetchChallengeData();
   }
 
   @override
