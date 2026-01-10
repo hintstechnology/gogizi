@@ -6,10 +6,21 @@ class UserProfile {
   final String? email;
   final String? phoneNumber;
   final String? name;
-  final int? age;
+  final DateTime? birthDate; // Replaces age
   final Gender? gender;
   final double? height; // cm
   final double? weight; // kg
+
+  // Helper getter for Age
+  int? get age {
+    if (birthDate == null) return null;
+    final now = DateTime.now();
+    int age = now.year - birthDate!.year;
+    if (now.month < birthDate!.month || (now.month == birthDate!.month && now.day < birthDate!.day)) {
+      age--;
+    }
+    return age;
+  }
   final int? stressLevel; // 1-5
   final ActivityLevel? activityLevel;
   final NutritionalNeeds? nutritionalNeeds;
@@ -21,7 +32,7 @@ class UserProfile {
     this.email,
     this.phoneNumber,
     this.name,
-    this.age,
+    this.birthDate,
     this.gender,
     this.height,
     this.weight,
@@ -33,28 +44,17 @@ class UserProfile {
   });
 
   Map<String, dynamic> toJson() {
-    // Convert age to birth_date (approximate if user only inputs age)
-    // Better: Controller should manage birthDate, but if we only have age int:
-    // We can't accurately save birth_date from age.
-    // Ideally UI inputs birthDate.
-    // If UI inputs Age, we save it where?
-    // If DB REQUIRES birth_date, we need to ask User for Birth Date OR estimte it.
-    // Let's assume we save to compatible fields if possible.
-    
-    // Note: Saving profile usually updates specific fields. 
-    // We return a map, but the Service dictates what gets sent to Supabase.
-    
     return {
       'id': id,
       'email': email,
       'phoneNumber': phoneNumber,
-      'full_name': name, // DB: full_name
-      // 'birth_date': ... hard to reverse age without full date
+      'full_name': name,
+      'birth_date': birthDate?.toIso8601String().split('T')[0], // Save as YYYY-MM-DD
       'gender': gender?.toString().split('.').last,
-      'height_cm': height, // DB: height_cm
-      'weight_kg': weight, // DB: weight_kg
+      'height_cm': height,
+      'weight_kg': weight,
       'stressLevel': stressLevel,
-      'activity_level': activityLevel?.toString().split('.').last, // DB: activity_level
+      'activity_level': activityLevel?.toString().split('.').last,
       'nutritionalNeeds': nutritionalNeeds?.toJson(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -67,7 +67,10 @@ class UserProfile {
       email: json['email'],
       phoneNumber: json['phoneNumber'],
       name: json['name'],
-      age: json['age'],
+      // Parse birth_date preferably, or fallback to age approximation if needed (handled in service now)
+      birthDate: json['birthDate'] != null ? 
+        (json['birthDate'] is DateTime ? json['birthDate'] : DateTime.tryParse(json['birthDate'].toString())) 
+        : null,
       gender: json['gender'] != null
           ? Gender.values.firstWhere(
               (e) => e.toString().split('.').last == json['gender'],
@@ -111,7 +114,7 @@ class UserProfile {
       email: 'anakmuda@example.com',
       phoneNumber: '081234567890',
       name: 'Anak Muda Sehat',
-      age: 20,
+      birthDate: DateTime(2000, 1, 1),
       gender: Gender.male,
       height: 170.0,
       weight: 65.0,

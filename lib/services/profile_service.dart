@@ -34,9 +34,24 @@ class ProfileService {
       // Merge auth data and map fields
       final data = Map<String, dynamic>.from(response);
       data['email'] = user.email;
-      data['name'] = data['full_name']; // Map full_name column to name field
-      // Map other potential discrepancies if schema differs
+      data['name'] = data['full_name'];
+      data['phoneNumber'] = data['phone_number'];
+      data['height'] = data['height_cm'];
+      data['weight'] = data['weight_kg'];
 
+      // Map birth_date to birthDate
+      if (data['birth_date'] != null) {
+         data['birthDate'] = data['birth_date']; // String is fine, fromJson parses it
+      }
+
+      // Map Activity Level (DB: sedentary/moderate/active -> App: low/medium/high)
+      if (data['activity_level'] != null) {
+        String dbLevel = data['activity_level'].toString().toLowerCase();
+        if (dbLevel == 'sedentary') data['activityLevel'] = 'low';
+        else if (dbLevel == 'moderate') data['activityLevel'] = 'medium';
+        else if (dbLevel == 'active') data['activityLevel'] = 'high';
+        else data['activityLevel'] = 'medium'; 
+      }
       
       return UserProfile.fromJson(data);
     } catch (e) {
@@ -55,27 +70,19 @@ class ProfileService {
       switch (level) {
         case ActivityLevel.low: return 'sedentary';
         case ActivityLevel.medium: return 'moderate';
-        case ActivityLevel.high: return 'active'; // 'active' or 'very_active' depending on schema check
+        case ActivityLevel.high: return 'active';
         default: return 'sedentary';
       }
-    }
-
-    // Helper to estimate birth_date from age
-    String estimateBirthDate(int? age) {
-      if (age == null) return '2000-01-01';
-      final year = DateTime.now().year - age;
-      return '$year-01-01';
     }
 
     final updates = {
       'full_name': profile.name,
       'phone_number': profile.phoneNumber,
-      'birth_date': estimateBirthDate(profile.age), // DB uses birth_date
-      'gender': profile.gender?.toString().split('.').last, // 'male', 'female' matches DB
-      'height_cm': profile.height, // DB uses height_cm
-      'weight_kg': profile.weight, // DB uses weight_kg
+      'birth_date': profile.birthDate?.toIso8601String(), // Send exact date
+      'gender': profile.gender?.toString().split('.').last,
+      'height_cm': profile.height,
+      'weight_kg': profile.weight,
       'activity_level': mapActivity(profile.activityLevel),
-      // 'updated_at': DateTime.now().toIso8601String(), // Trigger usually handles this, or manual is fine
     };
 
     // Remove nulls if partially updating (though here we likely update all form fields)

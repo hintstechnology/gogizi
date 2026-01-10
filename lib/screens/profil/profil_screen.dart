@@ -17,11 +17,12 @@ class ProfilScreen extends StatefulWidget {
 
 class _ProfilScreenState extends State<ProfilScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _ageController = TextEditingController();
+  final _birthDateController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  DateTime? _selectedBirthDate;
   Gender? _selectedGender;
   int _stressLevel = 3;
   ActivityLevel? _selectedActivityLevel;
@@ -44,15 +45,18 @@ class _ProfilScreenState extends State<ProfilScreen> {
       setState(() {
         _profile = profile;
         if (profile != null) {
-          _ageController.text = profile.age?.toString() ?? '';
+          _selectedBirthDate = profile.birthDate;
+          if (profile.birthDate != null) {
+             _birthDateController.text = "${profile.birthDate!.day}/${profile.birthDate!.month}/${profile.birthDate!.year}";
+          }
           _heightController.text = profile.height?.toString() ?? '';
           _weightController.text = profile.weight?.toString() ?? '';
           _phoneController.text = profile.phoneNumber ?? '';
           _selectedGender = profile.gender;
           _stressLevel = profile.stressLevel ?? 3;
           _selectedActivityLevel = profile.activityLevel;
-          // Calculate if data available
-          if (profile.age != null && profile.height != null && profile.weight != null) {
+          
+          if (profile.isComplete) {
              _calculatedNeeds =  NutritionalNeeds.calculate(profile);
           }
         }
@@ -63,17 +67,32 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   @override
   void dispose() {
-    _ageController.dispose();
+    _birthDateController.dispose();
     _heightController.dispose();
     _weightController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedBirthDate ?? DateTime(2000),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != _selectedBirthDate) {
+      setState(() {
+        _selectedBirthDate = picked;
+        _birthDateController.text = "${picked.day}/${picked.month}/${picked.year}";
+      });
+    }
+  }
+
   void _calculateNeeds() {
     if (_formKey.currentState!.validate()) {
       final profile = UserProfile(
-        age: int.tryParse(_ageController.text),
+        birthDate: _selectedBirthDate,
         gender: _selectedGender,
         height: double.tryParse(_heightController.text),
         weight: double.tryParse(_weightController.text),
@@ -110,10 +129,10 @@ class _ProfilScreenState extends State<ProfilScreen> {
        setState(() => _isLoading = true);
        try {
           final updatedProfile = UserProfile(
-            name: _profile?.name, // Keep existing name
+            name: _profile?.name,
             email: _profile?.email,
             phoneNumber: _phoneController.text,
-            age: int.tryParse(_ageController.text),
+            birthDate: _selectedBirthDate,
             gender: _selectedGender,
             height: double.tryParse(_heightController.text),
             weight: double.tryParse(_weightController.text),
@@ -123,11 +142,10 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
           await _profileService.updateProfile(updatedProfile);
           
-          // Generate new recommendations based on updated profile
           await RecommendationService().generateDailyRecommendations(updatedProfile);
           
           if (mounted) {
-             await _loadProfile(); // Refresh
+             await _loadProfile();
              ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Profil berhasil disimpan! Mantul!'),
@@ -149,6 +167,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate age for display
+    int? displayAge;
+    if (_selectedBirthDate != null) {
+      final now = DateTime.now();
+      displayAge = now.year - _selectedBirthDate!.year;
+      if (now.month < _selectedBirthDate!.month || (now.month == _selectedBirthDate!.month && now.day < _selectedBirthDate!.day)) {
+        displayAge--;
+      }
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
       appBar: AppBar(
@@ -221,26 +249,26 @@ class _ProfilScreenState extends State<ProfilScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Age
-              TextFormField(
-                controller: _ageController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Umur',
-                  hintText: 'Berapa tahun nih?',
-                  prefixIcon: const Icon(Icons.cake_outlined),
-                  suffixText: 'tahun',
+              // Birth Date Input
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: IgnorePointer(
+                  child: TextFormField(
+                    controller: _birthDateController,
+                    decoration: InputDecoration(
+                      labelText: 'Tanggal Lahir',
+                      hintText: 'Pilih Tanggal Lahir',
+                      prefixIcon: const Icon(Icons.calendar_today),
+                      suffixText: displayAge != null ? '$displayAge tahun' : '',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Kapan kamu lahir?';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Isi dulu umurnya bestie';
-                  }
-                  final age = int.tryParse(value);
-                  if (age == null || age < 10 || age > 100) {
-                    return 'Umur harus antara 10-100 tahun';
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 16),
@@ -472,7 +500,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 const SizedBox(height: 24),
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -520,11 +548,8 @@ class _ProfilScreenState extends State<ProfilScreen> {
               // Logout Button
               OutlinedButton.icon(
                 onPressed: () async {
-                  // Logout from Supabase
                   await Supabase.instance.client.auth.signOut();
-                  
                   if (context.mounted) {
-                    // Navigate to Login Screen and remove all previous routes
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
                       (route) => false,
