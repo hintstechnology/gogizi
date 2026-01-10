@@ -78,7 +78,6 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
         'fat': _result!.nutritionalInfo.fat,
         'is_sweet_drink': _result!.isSweetDrink,
         'logged_at': DateTime.now().toIso8601String(),
-        'confidence_score': _result!.confidence,
       });
 
       if (mounted) {
@@ -576,30 +575,19 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
             const SizedBox(height: 24),
 
             // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _isSaving ? null : _saveToHistory,
-                    icon: _isSaving 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) 
-                      : const Icon(Icons.save_outlined),
-                    label: const Text('Simpan'),
-                  ),
+            // Action buttons
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isSaving ? null : _saveToHistory,
+                icon: _isSaving
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.save_outlined, color: Colors.white),
+                label: const Text('Simpan'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RekomendasiScreen()),
-                      );
-                    },
-                    icon: const Icon(Icons.restaurant_menu),
-                    label: const Text('Rekomendasi'),
-                  ),
-                ),
-              ],
+              ),
             ),
 
             const SizedBox(height: 16),

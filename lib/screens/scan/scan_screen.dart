@@ -157,7 +157,7 @@ class _ScanScreenState extends State<ScanScreen> {
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () => _pickImage(ImageSource.camera),
-                          icon: const Icon(Icons.camera_alt),
+                          icon: const Icon(Icons.camera_alt, color: Colors.white),
                           label: const Text('Ambil Foto'),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),

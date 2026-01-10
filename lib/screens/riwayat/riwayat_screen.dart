@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme/app_theme.dart';
-import '../../models/daily_history.dart';
-import '../../models/scan_result.dart';
+import '../../models/scan_result.dart'; // Ensure this model exists and matches
 
 class RiwayatScreen extends StatefulWidget {
   const RiwayatScreen({super.key});
@@ -13,34 +13,77 @@ class RiwayatScreen extends StatefulWidget {
 }
 
 class _RiwayatScreenState extends State<RiwayatScreen> {
-  final List<DailyHistory> _history = DailyHistory.dummyHistory;
+  final _supabase = Supabase.instance.client;
 
-  List<ScanResult> get _allScans {
-    return _history.expand((day) => day.scanResults).toList();
+  Stream<List<ScanResult>> _getHistoryStream() {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _supabase
+        .from('food_logs')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', user.id)
+        .order('logged_at', ascending: false)
+        .map((data) => data.map((row) => _mapDbRowToScanResult(row)).toList());
+  }
+
+  ScanResult _mapDbRowToScanResult(Map<String, dynamic> row) {
+    // Note: Some nutritional info might be missing if not saved to DB
+    // We use safe defaults or 0.0
+    final nutritionalInfo = NutritionalInfo(
+      calories: (row['calories'] as num?)?.toDouble() ?? 0.0,
+      protein: (row['protein'] as num?)?.toDouble() ?? 0.0,
+      carbs: (row['carbs'] as num?)?.toDouble() ?? 0.0,
+      fat: (row['fat'] as num?)?.toDouble() ?? 0.0,
+      sugar: (row['sugar'] as num?)?.toDouble() ?? 0.0, 
+      fiber: (row['fiber'] as num?)?.toDouble() ?? 0.0,
+      sodium: (row['sodium'] as num?)?.toDouble() ?? 0.0,
+    );
+
+    final isSweetDrink = row['is_sweet_drink'] as bool? ?? false;
+    final category = isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food;
+    final label = row['food_name'] ?? 'Unknown';
+
+    // Re-generate analysis since we don't store it structure
+    final riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);
+    final alternatives = ScanResult.generateAlternatives(label, category);
+
+    return ScanResult(
+      id: row['id'].toString(),
+      label: label,
+      confidence: 1.0, 
+      category: category,
+      nutritionalInfo: nutritionalInfo,
+      scannedAt: DateTime.parse(row['logged_at']),
+      imagePath: row['image_local_path'],
+      isSweetDrink: isSweetDrink,
+      riskAnalysis: riskAnalysis,
+      healthierAlternatives: alternatives,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final groupedHistory = <DateTime, List<ScanResult>>{};
-    for (var scan in _allScans) {
-      final date = DateTime(
-        scan.scannedAt.year,
-        scan.scannedAt.month,
-        scan.scannedAt.day,
-      );
-      if (!groupedHistory.containsKey(date)) {
-        groupedHistory[date] = [];
-      }
-      groupedHistory[date]!.add(scan);
-    }
-
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
       appBar: AppBar(
         title: const Text('Riwayat'),
       ),
-      body: groupedHistory.isEmpty
-          ? Center(
+      body: StreamBuilder<List<ScanResult>>(
+        stream: _getHistoryStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final scans = snapshot.data ?? [];
+
+          if (scans.isEmpty) {
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -58,35 +101,54 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                   ),
                 ],
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: groupedHistory.length,
-              itemBuilder: (context, index) {
-                final entry = groupedHistory.entries.toList()[index];
-                final date = entry.key;
-                final scans = entry.value;
+            );
+          }
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: ExpansionTile(
-                    leading: Icon(
-                      Icons.calendar_today,
-                      color: AppTheme.primaryOrange,
-                    ),
-                    title: Text(
-                      DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date),
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    subtitle: Text(
-                      '${scans.length} item',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    children: scans.map((scan) => _buildScanItem(scan)).toList(),
+          // Group by date
+          final groupedHistory = <DateTime, List<ScanResult>>{};
+          for (var scan in scans) {
+            final date = DateTime(
+              scan.scannedAt.year,
+              scan.scannedAt.month,
+              scan.scannedAt.day,
+            );
+            if (!groupedHistory.containsKey(date)) {
+              groupedHistory[date] = [];
+            }
+            groupedHistory[date]!.add(scan);
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: groupedHistory.length,
+            itemBuilder: (context, index) {
+              final entry = groupedHistory.entries.toList()[index];
+              final date = entry.key;
+              final groupedScans = entry.value;
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: ExpansionTile(
+                  initiallyExpanded: index == 0,
+                  leading: Icon(
+                    Icons.calendar_today,
+                    color: AppTheme.primaryOrange,
                   ),
-                );
-              },
-            ),
+                  title: Text(
+                    DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  subtitle: Text(
+                    '${groupedScans.length} item',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  children: groupedScans.map((scan) => _buildScanItem(scan)).toList(),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -202,7 +264,12 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
             _buildDetailRow('Protein', '${scan.nutritionalInfo.protein.toInt()} g'),
             _buildDetailRow('Karbohidrat', '${scan.nutritionalInfo.carbs.toInt()} g'),
             _buildDetailRow('Lemak', '${scan.nutritionalInfo.fat.toInt()} g'),
-            _buildDetailRow('Gula', '${scan.nutritionalInfo.sugar.toInt()} g'),
+            // Only show sugar/sodium if not 0 (since default is 0 and we might not have data)
+            if (scan.nutritionalInfo.sugar > 0)
+              _buildDetailRow('Gula', '${scan.nutritionalInfo.sugar.toInt()} g'),
+            if (scan.nutritionalInfo.sodium > 0)  
+              _buildDetailRow('Natrium', '${scan.nutritionalInfo.sodium.toInt()} mg'),
+              
             const SizedBox(height: 16),
             Text(
               'Waktu Scan',
@@ -214,7 +281,7 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 24),
-            SizedBox(
+             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),

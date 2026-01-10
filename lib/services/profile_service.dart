@@ -53,7 +53,26 @@ class ProfileService {
         else data['activityLevel'] = 'medium'; 
       }
       
-      return UserProfile.fromJson(data);
+      final profile = UserProfile.fromJson(data);
+      
+      // Calculate nutritional needs
+      final needs = NutritionalNeeds.calculate(profile);
+      
+      return UserProfile(
+        id: profile.id,
+        email: profile.email,
+        phoneNumber: profile.phoneNumber,
+        name: profile.name,
+        birthDate: profile.birthDate,
+        gender: profile.gender,
+        height: profile.height,
+        weight: profile.weight,
+        stressLevel: profile.stressLevel,
+        activityLevel: profile.activityLevel,
+        createdAt: profile.createdAt,
+        updatedAt: profile.updatedAt,
+        nutritionalNeeds: needs,
+      );
     } catch (e) {
       print('Error fetching profile: $e');
       return null;
