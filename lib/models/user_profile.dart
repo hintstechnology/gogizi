@@ -33,17 +33,28 @@ class UserProfile {
   });
 
   Map<String, dynamic> toJson() {
+    // Convert age to birth_date (approximate if user only inputs age)
+    // Better: Controller should manage birthDate, but if we only have age int:
+    // We can't accurately save birth_date from age.
+    // Ideally UI inputs birthDate.
+    // If UI inputs Age, we save it where?
+    // If DB REQUIRES birth_date, we need to ask User for Birth Date OR estimte it.
+    // Let's assume we save to compatible fields if possible.
+    
+    // Note: Saving profile usually updates specific fields. 
+    // We return a map, but the Service dictates what gets sent to Supabase.
+    
     return {
       'id': id,
       'email': email,
       'phoneNumber': phoneNumber,
-      'name': name,
-      'age': age,
+      'full_name': name, // DB: full_name
+      // 'birth_date': ... hard to reverse age without full date
       'gender': gender?.toString().split('.').last,
-      'height': height,
-      'weight': weight,
+      'height_cm': height, // DB: height_cm
+      'weight_kg': weight, // DB: weight_kg
       'stressLevel': stressLevel,
-      'activityLevel': activityLevel?.toString().split('.').last,
+      'activity_level': activityLevel?.toString().split('.').last, // DB: activity_level
       'nutritionalNeeds': nutritionalNeeds?.toJson(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),

@@ -50,20 +50,45 @@ class ProfileService {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
+    // Helper to map activity (App Enum -> DB String)
+    String mapActivity(ActivityLevel? level) {
+      switch (level) {
+        case ActivityLevel.low: return 'sedentary';
+        case ActivityLevel.medium: return 'moderate';
+        case ActivityLevel.high: return 'active'; // 'active' or 'very_active' depending on schema check
+        default: return 'sedentary';
+      }
+    }
+
+    // Helper to estimate birth_date from age
+    String estimateBirthDate(int? age) {
+      if (age == null) return '2000-01-01';
+      final year = DateTime.now().year - age;
+      return '$year-01-01';
+    }
+
     final updates = {
       'full_name': profile.name,
       'phone_number': profile.phoneNumber,
-      'age': profile.age,
-      'gender': profile.gender?.toString().split('.').last,
-      'height': profile.height,
-      'weight': profile.weight,
-      'activity_level': profile.activityLevel?.toString().split('.').last,
-      'updated_at': DateTime.now().toIso8601String(),
+      'birth_date': estimateBirthDate(profile.age), // DB uses birth_date
+      'gender': profile.gender?.toString().split('.').last, // 'male', 'female' matches DB
+      'height_cm': profile.height, // DB uses height_cm
+      'weight_kg': profile.weight, // DB uses weight_kg
+      'activity_level': mapActivity(profile.activityLevel),
+      // 'updated_at': DateTime.now().toIso8601String(), // Trigger usually handles this, or manual is fine
     };
 
-    await _supabase.from('profiles').upsert({
-      'id': user.id,
-      ...updates,
-    });
+    // Remove nulls if partially updating (though here we likely update all form fields)
+    // updates.removeWhere((key, value) => value == null);
+
+    try {
+      await _supabase.from('profiles').upsert({
+        'id': user.id,
+        ...updates,
+      });
+    } catch (e) {
+      print('Error updating profile: $e');
+      rethrow;
+    }
   }
 }

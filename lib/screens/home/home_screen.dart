@@ -193,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 if (profile != null && profile.isComplete) {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) => const DetailKebutuhanScreen(),
+                                      builder: (_) => DetailKebutuhanScreen(needs: needs),
                                     ),
                                   );
                                 } else {

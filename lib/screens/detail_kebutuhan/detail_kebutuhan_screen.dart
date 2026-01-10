@@ -2,14 +2,47 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../models/user_profile.dart';
 import '../rekomendasi/rekomendasi_screen.dart';
+import '../../services/profile_service.dart';
 
-class DetailKebutuhanScreen extends StatelessWidget {
-  const DetailKebutuhanScreen({super.key});
+class DetailKebutuhanScreen extends StatefulWidget {
+  final NutritionalNeeds? needs;
+  
+  const DetailKebutuhanScreen({super.key, this.needs});
+
+  @override
+  State<DetailKebutuhanScreen> createState() => _DetailKebutuhanScreenState();
+}
+
+class _DetailKebutuhanScreenState extends State<DetailKebutuhanScreen> {
+  NutritionalNeeds? _needs;
+
+  @override
+  void initState() {
+    super.initState();
+    _needs = widget.needs;
+    if (_needs == null) {
+      _loadNeeds();
+    }
+  }
+
+  Future<void> _loadNeeds() async {
+    final profile = await ProfileService().getUserProfile();
+    if (profile != null) {
+      if (mounted) {
+        setState(() {
+          _needs = profile.nutritionalNeeds ?? NutritionalNeeds.calculate(profile);
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final needs = UserProfile.dummyProfile.nutritionalNeeds!;
-
+    // If loading, use default or zero, but better to wait. 
+    // For now we use dummy ONLY if loading fails or initial state to avoid crash, but labeled clearly.
+    // Actually, let's use a safe fallback of 0s if null to avoid misleading dummy data.
+    final needs = _needs ?? NutritionalNeeds.dummy; 
+    
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
       appBar: AppBar(

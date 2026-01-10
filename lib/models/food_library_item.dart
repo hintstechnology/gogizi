@@ -39,7 +39,7 @@ class FoodLibraryItem {
       aiClassLabel: json['ai_class_label'],
       portionDesc: json['portion_desc'],
       // Menggunakan num.toDouble() agar aman jika data dari DB berupa int atau float
-      calories: (json['calories'] as num).toDouble(),
+      calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
       protein: (json['protein'] as num?)?.toDouble() ?? 0.0,
       carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
       fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
@@ -57,5 +57,24 @@ class FoodLibraryItem {
     if (jsonVal == null) return [];
     if (jsonVal is List) return jsonVal.map((e) => e.toString()).toList();
     return [];
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'ai_class_label': aiClassLabel,
+      'portion_desc': portionDesc,
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'fiber': fiber,
+      'sugar': sugar,
+      'sodium_mg': sodiumMg,
+      'estimated_price': estimatedPrice,
+      'health_score': healthScore,
+      'warnings': warnings,
+    };
   }
 }
