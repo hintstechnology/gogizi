@@ -24,7 +24,7 @@ class ProfileService {
           name: user.userMetadata?['full_name'] ?? 'Pengguna Baru',
           phoneNumber: user.userMetadata?['phone_number'],
           // Default values for new users
-          age: 20,
+          birthDate: DateTime(2000, 1, 1),
           gender: Gender.male,
           activityLevel: ActivityLevel.medium,
           stressLevel: 3,
