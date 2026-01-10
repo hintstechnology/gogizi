@@ -12,9 +12,18 @@ class ChallengeScreen extends StatefulWidget {
 }
 
 class _ChallengeScreenState extends State<ChallengeScreen> {
-  ChallengeStatus _challenge = ChallengeStatus.dummy;
+  ChallengeStatus _challenge = ChallengeStatus(
+    startDate: DateTime.now(),
+    currentStreak: 0,
+    dailyStatus: {
+      for (int i = 1; i <= 7; i++)
+        i: DayStatus(day: i, completed: false, scanned: false, hasSweetDrink: false)
+    },
+    achievements: [],
+    isActive: false,
+    autoResetOnSweetDrink: true,
+  );
   bool _autoReset = true;
-
   bool _isLoading = true;
 
   @override
@@ -36,12 +45,12 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     try {
       final response = await supabase
           .from('food_logs')
-          .select('created_at, is_sweet_drink')
+          .select('eaten_at, is_sweet_drink')
           .eq('user_id', user.id)
-          .gte('created_at', startOfWindow.toIso8601String());
+          .gte('eaten_at', startOfWindow.toIso8601String());
       
       final logs = (response as List).map((e) => {
-        'date': DateTime.parse(e['created_at']).toLocal(),
+        'date': DateTime.parse(e['eaten_at']).toLocal(),
         'isSweetDrink': e['is_sweet_drink'] ?? false,
       }).toList();
 
