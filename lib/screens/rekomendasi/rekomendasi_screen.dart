@@ -260,6 +260,7 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
                   padding: const EdgeInsets.only(right: 12.0),
                   child: SizedBox(
                     width: 160,
+                    height: 230,
                     child: ProductCard(
                       title: '${item.name} ${item.portionDesc != null ? "(${item.portionDesc})" : ""}',
                       price: '${item.calories.round()} kkal',
@@ -347,25 +348,6 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-  // Helper moved to keep class structure if needed, but here we just replaced the body build.
-  // We need to keep the _buildMacroChip method.
-
-  Widget _buildMacroChip(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppTheme.cardGray,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        '$label: $value',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
       ),
     );
   }
