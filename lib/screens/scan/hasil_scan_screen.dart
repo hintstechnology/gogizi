@@ -76,7 +76,6 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
         'protein': _result!.nutritionalInfo.protein,
         'carbs': _result!.nutritionalInfo.carbs,
         'fat': _result!.nutritionalInfo.fat,
-        'is_sweet_drink': _result!.isSweetDrink,
         'eaten_at': DateTime.now().toIso8601String(),
       });
 

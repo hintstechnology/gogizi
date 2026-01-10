@@ -45,13 +45,13 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     try {
       final response = await supabase
           .from('food_logs')
-          .select('eaten_at, is_sweet_drink')
+          .select('eaten_at')
           .eq('user_id', user.id)
           .gte('eaten_at', startOfWindow.toIso8601String());
       
       final logs = (response as List).map((e) => {
         'date': DateTime.parse(e['eaten_at']).toLocal(),
-        'isSweetDrink': e['is_sweet_drink'] ?? false,
+        'isSweetDrink': false, // Column missing in DB
       }).toList();
 
       Map<int, DayStatus> dailyStatus = {};
