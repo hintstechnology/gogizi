@@ -485,7 +485,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                    Expanded(
                      child: ElevatedButton.icon(
                        onPressed: isPaused ? _resumeChallenge : _pauseChallenge,
-                       icon: Icon(isPaused ? Icons.play_arrow : Icons.pause),
+                       icon: Icon(isPaused ? Icons.play_arrow : Icons.pause, color: Colors.white),
                        label: Text(isPaused ? 'Lanjut' : 'Jeda'),
                      )
                    )

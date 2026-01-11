@@ -488,7 +488,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
               // Calculate button
               ElevatedButton.icon(
                 onPressed: _calculateNeeds,
-                icon: const Icon(Icons.calculate),
+                icon: const Icon(Icons.calculate, color: Colors.white),
                 label: const Text('Hitung Kebutuhan Gizi'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

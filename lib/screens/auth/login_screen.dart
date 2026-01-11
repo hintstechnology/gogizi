@@ -8,6 +8,7 @@ import '../main/main_navigation.dart';
 import '../admin/admin_dashboard_screen.dart';
 import '../../models/user_profile.dart'; // Keep this for dummy admin logic if needed
 import 'forgot_password_screen.dart';
+import 'verify_signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -344,6 +345,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  // Google Sign In (Copied from LoginScreen)
+  Future<void> _googleSignUp() async {
+    setState(() { _isLoading = true; });
+    try {
+      const webClientId = '193416484480-mengsi06c0b25r00qqhb7u4pt7hdmv7t.apps.googleusercontent.com';
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile', 'openid'],
+        serverClientId: kIsWeb ? null : webClientId, 
+      );
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() { _isLoading = false; });
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) throw 'No ID Token found.';
+
+      final AuthResponse response = await Supabase.instance.client.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      if (response.user != null) {
+         if (mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const MainNavigation()),
+              (route) => false,
+            );
+         }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign Up Gagal: $e')));
+      }
+    } finally {
+      if (mounted) setState(() { _isLoading = false; });
+    }
+  }
+
   Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -351,31 +397,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
 
       try {
+        final email = _emailController.text.trim();
+        final password = _passwordController.text.trim();
+        final name = _nameController.text.trim();
+        final phone = _phoneController.text.trim();
+
         // 1. Sign Up to Supabase
+        // We pass phone and name in metadata, but verification is required.
         final AuthResponse res = await Supabase.instance.client.auth.signUp(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
+          email: email,
+          password: password,
           data: {
-             'full_name': _nameController.text.trim(),
+             'full_name': name,
+             'phone_number': phone,
           },
         );
 
+        // Check if user is created but session is null (implies email verification needed)
+        // If session is NOT null, it means auto-confirm is ON.
+        
         if (res.user != null) {
-          // 2. Update Phone Number in Profiles manually
-          // The profile row should have been created by trigger on auth.users insert.
-          // We update it with the phone number.
-          
-          await Supabase.instance.client.from('profiles').update({
-            'phone_number': _phoneController.text.trim(),
-            'full_name': _nameController.text.trim(),
-          }).eq('id', res.user!.id);
-
-          if (mounted) {
+           if (mounted) {
              ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Pendaftaran berhasil! Silakan login.')),
-            );
-            Navigator.of(context).pop(); // Go back to Login
-          }
+               const SnackBar(content: Text('Silakan cek email untuk kode verifikasi.')),
+             );
+             
+             // Navigate to OTP Verification Screen
+             Navigator.of(context).push(
+               MaterialPageRoute(
+                 builder: (_) => VerifySignupScreen(
+                   email: email,
+                   fullName: name,
+                   phoneNumber: phone,
+                 ),
+               ),
+             );
+           }
         }
 
       } catch (e) {
@@ -595,20 +652,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 16),
 
-                // Google register button (Redirects to Login because Google Auth handles both)
+                // Google register button (Functional)
                 OutlinedButton.icon(
-                  onPressed: () {
-                    // Google Sign In is same as Sign Up. 
-                    // We can just pop back to login and trigger login, 
-                    // or implement the same logic here. 
-                    // For simplicity, let's pop and show message to use login page for Google.
-                    // OR better: copy the _login logic here?
-                    // Best practice: Google Button is usually just "Continue with Google".
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Silakan gunakan tombol Google di halaman Masuk.')),
-                    );
-                  },
+                  onPressed: _isLoading ? null : _googleSignUp,
                   icon: const Icon(Icons.g_mobiledata, size: 24),
                   label: const Text('Daftar dengan Google'),
                 ),

@@ -17,6 +17,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   
   bool _isLoading = false;
   bool _isOtpSent = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   
   final _supabase = Supabase.instance.client;
 
@@ -144,21 +146,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                  const SizedBox(height: 16),
                  TextField(
                    controller: _passwordController,
-                   obscureText: true,
-                   decoration: const InputDecoration(
+                   obscureText: _obscurePassword,
+                   decoration: InputDecoration(
                      labelText: 'Password Baru', 
-                     border: OutlineInputBorder(),
-                     prefixIcon: Icon(Icons.lock),
+                     border: const OutlineInputBorder(),
+                     prefixIcon: const Icon(Icons.lock),
+                     suffixIcon: IconButton(
+                       icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                     ),
                    ),
                  ),
                  const SizedBox(height: 16),
                  TextField(
                    controller: _confirmPasswordController,
-                   obscureText: true,
-                   decoration: const InputDecoration(
+                   obscureText: _obscureConfirmPassword,
+                   decoration: InputDecoration(
                      labelText: 'Konfirmasi Password', 
-                     border: OutlineInputBorder(),
-                     prefixIcon: Icon(Icons.lock_outline),
+                     border: const OutlineInputBorder(),
+                     prefixIcon: const Icon(Icons.lock_outline),
+                     suffixIcon: IconButton(
+                       icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                       onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                     ),
                    ),
                  ),
                  const SizedBox(height: 24),

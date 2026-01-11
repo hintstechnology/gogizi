@@ -178,7 +178,7 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _regenerateRecommendations,
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh, color: Colors.white),
                 label: const Text('Cari Menu Lain'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4CA771),
