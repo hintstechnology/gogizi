@@ -213,93 +213,125 @@ class _RekomendasiScreenState extends State<RekomendasiScreen> {
     double totalCarb = items.fold(0, (sum, i) => sum + i.carbs);
     double totalFat = items.fold(0, (sum, i) => sum + i.fat);
 
+    IconData mealIcon;
+    Color mealColor;
+    if (title.contains('Pagi')) {
+       mealIcon = Icons.wb_sunny_outlined;
+       mealColor = Colors.orange;
+    } else if (title.contains('Siang')) {
+       mealIcon = Icons.wb_cloudy_outlined;
+       mealColor = Colors.blue;
+    } else {
+       mealIcon = Icons.nights_stay_outlined;
+       mealColor = Colors.indigo;
+    }
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                time,
-                style: TextStyle(color: Colors.grey[500], fontSize: 13),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          
-          if (items.isEmpty)
-            const Text('Menu belum tersedia')
-          else
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
-                    Expanded(
-                      child: Text(
-                        '${item.name} ${item.portionDesc != null ? "(${item.portionDesc})" : ""}',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ],
-                ),
-              )).toList(),
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: mealColor.withOpacity(0.1),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 8),
-          
-          // Nutrition Summary Grid
-          Row(
-            children: [
-              _buildNutrientInfo('Kalori', '${totalCal.round()}', 'kcal', Colors.orange),
-              _buildNutrientInfo('Protein', '${totalPro.round()}', 'g', Colors.blue),
-              _buildNutrientInfo('Karbo', '${totalCarb.round()}', 'g', Colors.brown),
-              _buildNutrientInfo('Lemak', '${totalFat.round()}', 'g', Colors.yellow[800]!),
-            ],
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(mealIcon, color: mealColor, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                       Text(time, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                     ]
+                  )
+                ),
+              ],
+            ),
           ),
+          
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (items.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Text('Belum ada menu, silakan generate ulang.', style: TextStyle(color: Colors.grey)),
+                  )
+                else
+                  ...items.map((item) => Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.check_circle_outline, color: Color(0xFF4CA771), size: 18),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            '${item.name} ${item.portionDesc != null ? "(${item.portionDesc})" : ""}',
+                            style: const TextStyle(fontSize: 15, height: 1.3),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+
+                const SizedBox(height: 20),
+                const Divider(height: 1),
+                const SizedBox(height: 16),
+
+                // Nutrient Grid - Corrected Order
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNutrientInfo('Kalori', '${totalCal.round()}', 'kcal', Colors.orange, Icons.local_fire_department),
+                    _buildNutrientInfo('Karbo', '${totalCarb.round()}', 'g', Colors.brown, Icons.bakery_dining),
+                    _buildNutrientInfo('Protein', '${totalPro.round()}', 'g', Colors.blue, Icons.fitness_center),
+                    _buildNutrientInfo('Lemak', '${totalFat.round()}', 'g', Colors.amber[700]!, Icons.opacity),
+                  ],
+                )
+              ],
+            ),
+          )
         ],
       ),
     );
   }
 
-  Widget _buildNutrientInfo(String label, String value, String unit, Color color) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                value, 
-                style: TextStyle(
-                  fontSize: 14, 
-                  fontWeight: FontWeight.bold,
-                  color: color
-                )
-              ),
-              Text(unit, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-            ],
-          )
-        ],
-      ),
+  Widget _buildNutrientInfo(String label, String value, String unit, Color color, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, size: 20, color: color.withOpacity(0.7)),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
     );
   }
 }

@@ -40,9 +40,18 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
       sodium: (row['sodium'] as num?)?.toDouble() ?? 0.0,
     );
 
-    final isSweetDrink = row['is_sweet_drink'] as bool? ?? false;
-    final category = isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food;
     final label = row['food_name'] ?? 'Unknown';
+
+    // Infer category since we don't store 'is_sweet_drink' in DB anymore
+    final isSweetDrink = label.toLowerCase().contains('teh') ||
+        (label.toLowerCase().contains('air') && !label.toLowerCase().contains('air dan sejenisnya')) || // air is water
+        label.toLowerCase().contains('minuman') ||
+        label.toLowerCase().contains('thai') ||
+        label.toLowerCase().contains('kopi') ||
+        label.toLowerCase().contains('jus') ||
+        label.toLowerCase().contains('boba');
+        
+    final category = isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food;
 
     // Re-generate analysis since we don't store it structure
     final riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);

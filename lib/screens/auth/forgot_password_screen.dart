@@ -29,14 +29,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() => _isLoading = true);
     try {
-      // Use signInWithOtp to send a code
-      await _supabase.auth.signInWithOtp(
-        email: email,
-        shouldCreateUser: false,
-      );
+      // Use resetPasswordForEmail for proper recovery flow
+      await _supabase.auth.resetPasswordForEmail(email);
       setState(() => _isOtpSent = true);
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kode dikirim ke email')));
+         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kode reset dikirim ke email')));
       }
     } catch (e) {
       if (mounted) {
@@ -69,10 +66,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       final email = _emailController.text.trim();
       
-      // Verify OTP (Type email for signInWithOtp)
+      // Verify OTP (Type recovery for resetPassword flow)
       final res = await _supabase.auth.verifyOTP(
         token: otp,
-        type: OtpType.email, 
+        type: OtpType.recovery, 
         email: email,
       );
       
