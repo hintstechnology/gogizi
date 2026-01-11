@@ -42,16 +42,20 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
 
     final label = row['food_name'] ?? 'Unknown';
 
-    // Infer category since we don't store 'is_sweet_drink' in DB anymore
-    final isSweetDrink = label.toLowerCase().contains('teh') ||
-        (label.toLowerCase().contains('air') && !label.toLowerCase().contains('air dan sejenisnya')) || // air is water
-        label.toLowerCase().contains('minuman') ||
-        label.toLowerCase().contains('thai') ||
-        label.toLowerCase().contains('kopi') ||
-        label.toLowerCase().contains('jus') ||
-        label.toLowerCase().contains('boba');
+    // Logic based on specific TFLite classes
+    final labelLower = label.toLowerCase();
+    
+    final isWater = labelLower.contains('air dan sejenisnya');
+    
+    final isSweetDrink = labelLower.contains('es teh') || 
+                         labelLower.contains('minuman botol') || 
+                         labelLower.contains('thai tea');
+                         
+    final isDrink = isWater || isSweetDrink;
         
-    final category = isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food;
+    final category = isSweetDrink 
+        ? FoodCategory.sweetDrink 
+        : (isDrink ? FoodCategory.drink : FoodCategory.food);
 
     // Re-generate analysis since we don't store it structure
     final riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);

@@ -45,40 +45,24 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     if (user == null) return;
 
     // 1. Get State from Prefs
-    final startDateStr = _prefs!.getString('challenge_start_date');
+    // 1. Get State from Prefs
+    String? startDateStr = _prefs!.getString('challenge_start_date');
     final pausedAtStr = _prefs!.getString('challenge_paused_at');
 
+    // Auto-Start Challenge if not active
     if (startDateStr == null) {
-      // Not active
-      if (mounted) {
-        setState(() {
-          _challenge = ChallengeStatus(
-            startDate: DateTime.now(),
-            currentStreak: 0,
-            dailyStatus: _generateEmptyDays(),
-            achievements: [],
-            isActive: false,
-            autoResetOnSweetDrink: true,
-          );
-          _isLoading = false;
-        });
-      }
-      return;
+       final now = DateTime.now();
+       await _prefs!.setString('challenge_start_date', now.toIso8601String());
+       startDateStr = now.toIso8601String();
     }
 
     DateTime startDate = DateTime.parse(startDateStr);
     final bool isPaused = pausedAtStr != null;
     DateTime? pauseDate = isPaused ? DateTime.parse(pausedAtStr) : null;
 
-    // 2. Query Logs from Start Date until Now
-    // We need to check compliance for every day from Day 1 to Day 7 (or Today)
-    final now = DateTime.now();
-    // If paused, we only check up to pauseDate? No, if paused, time is frozen.
-    // But we need to check logs for the active days.
-    
-    // Calculate effective days
-    // Day 1 = startDate.
-    // Day N = startDate + (N-1) days.
+    // 2. Query Logs for the Challenge Window
+    // We only care about logs AFTER or ON startDate (Day 1)
+    // Actually, we iterate 7 days.
     
     final response = await supabase
         .from('food_logs')
@@ -88,21 +72,22 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
 
     final logs = (response as List).map((e) {
       final label = (e['food_name'] as String? ?? '').toLowerCase();
-      // Inference Logic
-      final isSweetDrink = label.contains('teh') ||
-          (label.contains('air') && !label.contains('air dan sejenisnya')) ||
-          label.contains('minuman') ||
-          label.contains('thai') ||
-          label.contains('kopi') ||
-          label.contains('jus') ||
-          label.contains('boba');
       
-      final isWater = label.contains('air') && !isSweetDrink;
+      // Logic based on specific TFLite classes:
+      // Classes: 'Air dan sejenisnya', 'Es teh', 'Minuman botol', 'Thai tea', and foods.
+      
+      final lower = label.toLowerCase();
+      
+      final isWater = lower.contains('air dan sejenisnya');
+      
+      final isSweetDrink = lower.contains('es teh') || 
+                           lower.contains('minuman botol') || 
+                           lower.contains('thai tea');
 
       return {
         'date': DateTime.parse(e['eaten_at']).toLocal(),
         'isSweetDrink': isSweetDrink,
-        'isWater': isWater, // Only water counts for success
+        'isWater': isWater, 
       };
     }).toList();
 

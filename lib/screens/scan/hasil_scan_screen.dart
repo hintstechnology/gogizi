@@ -168,32 +168,57 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
         nutritionalInfo = NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
     }
 
-    RiskAnalysis riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);
+        return NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
+    }
+  }
+
+  // Generate result based on selected food
+  void _generateResult() {
+    if (_selectedFood == null) return;
+
+    final label = _selectedFood!;
+    final confidence = 0.95; // High confidence since user confirmed
+
+    // Logic based on specific TFLite classes provided by user
+    final labelLower = label.toLowerCase();
     
-    // Custom logic for water
-    if (label == 'Air dan sejenisnya') {
-        riskAnalysis = RiskAnalysis(
-            risks: [],
-            warnings: ['Tetap jaga hidrasi tubuh!'],
-            overallRisk: 'Aman',
-        );
+    // Explicit Mapping
+    final isWater = labelLower.contains('air dan sejenisnya');
+    
+    final isSweetDrink = labelLower.contains('es teh') || 
+                         labelLower.contains('minuman botol') || 
+                         labelLower.contains('thai tea');
+
+    final isDrinkKeyword = isWater || isSweetDrink;
+
+    // Final Determination
+    final bool isSweetDrinkFinal = isSweetDrink;
+    
+    FoodCategory category;
+    if (isSweetDrinkFinal) {
+      category = FoodCategory.sweetDrink;
+    } else if (isWater) {
+      category = FoodCategory.drink;
+    } else {
+      category = FoodCategory.food; // Everything else (Bakso, Seblak, etc) is Food
     }
 
-    final alternatives = ScanResult.generateAlternatives(
-      label,
-      isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food,
-    );
+    final nutritionalInfo = _getNutritionalInfo(label);
+    
+    // Auto-generate Risk & Alternatives
+    final riskAnalysis = ScanResult.analyzeRisks(nutritionalInfo);
+    final alternatives = ScanResult.generateAlternatives(label, category);
 
     setState(() {
       _result = ScanResult(
         id: 'scan_${DateTime.now().millisecondsSinceEpoch}',
         label: label,
-        confidence: 0.95, // High confidence since user confirmed
-        category: isSweetDrink ? FoodCategory.sweetDrink : FoodCategory.food,
+        confidence: confidence,
+        category: category,
         nutritionalInfo: nutritionalInfo,
         scannedAt: DateTime.now(),
         imagePath: widget.imagePath,
-        isSweetDrink: isSweetDrink && label != 'Air', // Air is drink but not sweet
+        isSweetDrink: isSweetDrink, 
         riskAnalysis: riskAnalysis,
         healthierAlternatives: alternatives,
       );
