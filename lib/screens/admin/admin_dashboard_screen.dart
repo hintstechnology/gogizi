@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Added
 import '../../theme/app_theme.dart';
 import '../../models/user_profile.dart'; // Reusing existing model structure
 import 'package:intl/intl.dart';
@@ -12,69 +13,67 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  // Mock data for the admin dashboard
-  final List<UserProfile> _registeredUsers = [
-    UserProfile(
-      id: 'u001',
-      name: 'Budi Santoso',
-      email: 'budi.santoso@mhs.university.ac.id',
-      birthDate: DateTime(2003, 1, 1),
-      gender: Gender.male,
-      height: 172,
-      weight: 68,
-      activityLevel: ActivityLevel.medium,
-      createdAt: DateTime.now().subtract(const Duration(days: 45)),
-      phoneNumber: '081234567801',
-    ),
-    UserProfile(
-      id: 'u002',
-      name: 'Siti Aminah',
-      email: 'siti.aminah@mhs.university.ac.id',
-      birthDate: DateTime(2004, 1, 1),
-      gender: Gender.female,
-      height: 160,
-      weight: 52,
-      activityLevel: ActivityLevel.low,
-      createdAt: DateTime.now().subtract(const Duration(days: 30)),
-      phoneNumber: '081234567802',
-    ),
-    UserProfile(
-      id: 'u003',
-      name: 'Rizky Pratama',
-      email: 'rizky.p@mhs.university.ac.id',
-      birthDate: DateTime(2002, 1, 1),
-      gender: Gender.male,
-      height: 178,
-      weight: 85,
-      activityLevel: ActivityLevel.high,
-      createdAt: DateTime.now().subtract(const Duration(days: 15)),
-      phoneNumber: '081234567803',
-    ),
-    UserProfile(
-      id: 'u004',
-      name: 'Dewi Lestari',
-      email: 'dewi.lestari@mhs.university.ac.id',
-      birthDate: DateTime(2005, 1, 1),
-      gender: Gender.female,
-      height: 158,
-      weight: 48,
-      activityLevel: ActivityLevel.medium,
-      createdAt: DateTime.now().subtract(const Duration(days: 10)),
-      phoneNumber: '081234567804',
-    ),
-     UserProfile(
-      id: 'u005',
-      name: 'Ahmad Faisal',
-      email: 'ahmad.faisal@mhs.university.ac.id',
-      birthDate: DateTime(2001, 1, 1),
-      gender: Gender.male,
-      height: 165,
-      weight: 70,
-      activityLevel: ActivityLevel.low,
-      createdAt: DateTime.now().subtract(const Duration(days: 5)),
-      phoneNumber: '081234567805',
-    ),
-  ];
+  List<UserProfile> _registeredUsers = [];
+  bool _isLoading = true;
+  int _totalScans = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAdminData();
+  }
+
+  Future<void> _fetchAdminData() async {
+    setState(() => _isLoading = true);
+    try {
+      final supabase = Supabase.instance.client;
+      
+      // 1. Fetch Profiles
+      // Note: RLS must allow reading all profiles. If unauthenticated (fake login), this might fail if RLS is strict.
+      // Assuming 'profiles' is readable.
+      final response = await supabase.from('profiles').select();
+      
+      // 2. Fetch Stats (Total Scans)
+      final countResponse = await supabase.from('food_logs').count(CountOption.exact);
+      _totalScans = countResponse;
+
+      final List<dynamic> data = response as List<dynamic>;
+      
+      _registeredUsers = data.map((json) {
+         final m = Map<String, dynamic>.from(json);
+         // Map DB columns to Model keys
+         m['name'] = m['full_name'];
+         m['email'] = m['email']; // Profiles table might not have email if not synced? 
+                                  // BUT trigger usually syncs it.
+                                  // If email missing, handle gracefully.
+         
+         if (m['birth_date'] != null) {
+            m['birthDate'] = m['birth_date']; 
+         }
+         m['height'] = m['height_cm'];
+         m['weight'] = m['weight_kg'];
+         
+         // Activity Level Mapping
+         if (m['activity_level'] != null) {
+            String dbLevel = m['activity_level'].toString().toLowerCase();
+            if (dbLevel == 'sedentary') m['activityLevel'] = 'low';
+            else if (dbLevel == 'moderate') m['activityLevel'] = 'medium';
+            else if (dbLevel == 'active') m['activityLevel'] = 'high';
+         }
+
+         return UserProfile.fromJson(m);
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Admin Data Error: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,16 +90,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           color: AppTheme.primaryOrange,
         ),
         actions: [
+           IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _fetchAdminData,
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              // Validasi logout simpel
               Navigator.of(context).pushReplacementNamed('/'); 
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: _isLoading 
+         ? const Center(child: CircularProgressIndicator())
+         : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +118,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
             ),
             const SizedBox(height: 16),
-            _buildUserList(),
+            _registeredUsers.isEmpty 
+               ? const Center(child: Padding(padding: EdgeInsets.all(20), child: Text("Belum ada user terdaftar")))
+               : _buildUserList(),
           ],
         ),
       ),
@@ -135,9 +141,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         const SizedBox(width: 16),
         Expanded(
           child: _buildCard(
-            title: 'Aktif Hari Ini',
-            value: '3', // Dummy
-            icon: Icons.access_time,
+            title: 'Total Scan Makanan',
+            value: _totalScans.toString(),
+            icon: Icons.camera_alt,
             color: Colors.green,
           ),
         ),
@@ -208,11 +214,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             leading: CircleAvatar(
               backgroundColor: AppTheme.primaryOrange.withOpacity(0.1),
               child: Text(
-                user.name?[0] ?? '?',
+                (user.name?.isNotEmpty == true) ? user.name![0].toUpperCase() : '?',
                 style: TextStyle(color: AppTheme.primaryOrange),
               ),
             ),
-            title: Text(user.name ?? 'Unknown'),
+            title: Text(user.name ?? 'No Name'),
             subtitle: Text(user.email ?? '-'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {

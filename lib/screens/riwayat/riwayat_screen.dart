@@ -92,25 +92,36 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
           final scans = snapshot.data ?? [];
 
           if (scans.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.history,
-                    size: 64,
-                    color: AppTheme.textLight,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Belum ada riwayat scan',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          if (scans.isEmpty) {
+            return RefreshIndicator( // Allow refresh even if empty
+               onRefresh: () async { setState(() {}); },
+               child: SingleChildScrollView(
+                 physics: const AlwaysScrollableScrollPhysics(), // Provide physics
+                 child: SizedBox(
+                   height: MediaQuery.of(context).size.height * 0.7, // Take up space
+                   child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.history,
+                          size: 64,
                           color: AppTheme.textLight,
                         ),
-                  ),
-                ],
-              ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Belum ada riwayat scan',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: AppTheme.textLight,
+                              ),
+                        ),
+                      ],
+                    ),
+                   ),
+                 ),
+               ),
             );
+          }
           }
 
           // Group by date
@@ -127,34 +138,39 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
             groupedHistory[date]!.add(scan);
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: groupedHistory.length,
-            itemBuilder: (context, index) {
-              final entry = groupedHistory.entries.toList()[index];
-              final date = entry.key;
-              final groupedScans = entry.value;
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                child: ExpansionTile(
-                  initiallyExpanded: index == 0,
-                  leading: Icon(
-                    Icons.calendar_today,
-                    color: AppTheme.primaryOrange,
-                  ),
-                  title: Text(
-                    DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date),
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  subtitle: Text(
-                    '${groupedScans.length} item',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  children: groupedScans.map((scan) => _buildScanItem(scan)).toList(),
-                ),
-              );
+          return RefreshIndicator(
+            onRefresh: () async {
+              setState(() {});
             },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: groupedHistory.length,
+              itemBuilder: (context, index) {
+                final entry = groupedHistory.entries.toList()[index];
+                final date = entry.key;
+                final groupedScans = entry.value;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ExpansionTile(
+                    initiallyExpanded: index == 0,
+                    leading: Icon(
+                      Icons.calendar_today,
+                      color: AppTheme.primaryOrange,
+                    ),
+                    title: Text(
+                      DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date),
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    subtitle: Text(
+                      '${groupedScans.length} item',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    children: groupedScans.map((scan) => _buildScanItem(scan)).toList(),
+                  ),
+                );
+              },
+            ),
           );
         },
       ),

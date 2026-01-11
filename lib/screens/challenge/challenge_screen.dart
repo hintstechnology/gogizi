@@ -213,17 +213,22 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     if (mounted) {
       if (failed) {
          // Show Popup and Reset
-         // We do this via post-frame callback or immediate
-         // Better to show state as failed, then reset? 
-         // User said "otomatis dia gagal ... dibatalkan balik 0 ... pop up".
-         // I'll show dialog then clear prefs.
-         
-         // To avoid infinite loop of dialogs, check if we already handled?
-         // No, fetch calls on init.
          WidgetsBinding.instance.addPostFrameCallback((_) {
              _showFailDialog(failReason);
              _hardResetChallenge();
          });
+      }
+
+      if (currentStreak == 7) {
+          final victoryKey = 'challenge_victory_shown_${startDate.toIso8601String()}';
+          final alreadyShown = _prefs?.getBool(victoryKey) ?? false;
+          
+          if (!alreadyShown) {
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+                 _showSuccessDialog();
+                 _prefs?.setBool(victoryKey, true);
+             });
+          }
       }
 
       setState(() {
@@ -232,12 +237,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
           currentStreak: currentStreak,
           dailyStatus: dailyStatus,
           achievements: [],
-          isActive: !isPaused, // If paused, isActive is false visually? Or separate state?
-                               // ChallengeStatus has isActive bool.
-                               // If paused, we can set isActive=false or keep true but show "Paused".
-                               // I'll set isActive=true but handle Pause UI separately?
-                               // Actually let's use isActive=true always if started, 
-                               // and add a local bool _isPaused for UI.
+          isActive: !isPaused, 
           autoResetOnSweetDrink: true, // enforced
         );
         _isLoading = false;
@@ -299,6 +299,36 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('SELAMAT! 🎉'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+             Icon(Icons.emoji_events, color: Colors.orange, size: 80),
+             SizedBox(height: 16),
+             Text('Kamu berhasil menyelesaikan Tantangan 7 Hari Bebas Gula!', textAlign: TextAlign.center),
+             SizedBox(height: 8),
+             Text('Kamu keren banget! Pertahankan gaya hidup sehat ini ya.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+               Navigator.pop(context);
+               // Optional: Auto reset or keep as "Completed" state
+               // User might want to see the 7/7 checkboxes.
+            },
+            child: const Text('Mantap!'),
           )
         ],
       ),
