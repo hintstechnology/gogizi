@@ -120,6 +120,10 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       // It's Today or Past. Check Logs.
       final dayLogs = logs.where((log) {
         final d = log['date'] as DateTime;
+        // Strict check: Log must be AFTER the challenge start time
+        // This prevents immediate failure loops from past logs (even from earlier today)
+        if (d.isBefore(startDate)) return false; 
+        
         return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
       }).toList();
 
