@@ -45,13 +45,12 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     if (user == null) return;
 
     // 1. Get State from Prefs
-    // 1. Get State from Prefs
     String? startDateStr = _prefs!.getString('challenge_start_date');
     final pausedAtStr = _prefs!.getString('challenge_paused_at');
+    final now = DateTime.now();
 
     // Auto-Start Challenge if not active
     if (startDateStr == null) {
-       final now = DateTime.now();
        await _prefs!.setString('challenge_start_date', now.toIso8601String());
        startDateStr = now.toIso8601String();
     }

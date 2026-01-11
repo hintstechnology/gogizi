@@ -113,26 +113,17 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
     }
   }
 
-  // Generate result based on selected food
-  void _generateResult() {
-    if (_selectedFood == null) return;
 
-    final label = _selectedFood!;
-    final isSweetDrink = label.toLowerCase().contains('teh') ||
-        (label.toLowerCase().contains('air') && label != 'Air') || // 'Air' is water
-        label.toLowerCase().contains('minuman') ||
-        label.toLowerCase().contains('thai');
-
+  NutritionalInfo _getNutritionalInfo(String label) {
     NutritionalInfo nutritionalInfo;
     
     // Simple mock data mapping
-    // Map labels to nutritional info
     switch (label) {
       case 'Bakso':
         nutritionalInfo = NutritionalInfo(calories: 320, protein: 18, carbs: 45, fat: 8, sugar: 2, fiber: 2, sodium: 650);
         break;
       case 'Cimol atau cilok':
-        nutritionalInfo = NutritionalInfo(calories: 250, protein: 2, carbs: 55, fat: 12, sugar: 0, fiber: 1, sodium: 300);
+        nutritionalInfo = NutritionalInfo(calories: 250, protein: 1, carbs: 55, fat: 12, sugar: 0, fiber: 1, sodium: 300);
         break;
       case 'Seblak':
         nutritionalInfo = NutritionalInfo(calories: 450, protein: 12, carbs: 50, fat: 22, sugar: 4, fiber: 3, sodium: 900);
@@ -141,7 +132,7 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
         nutritionalInfo = NutritionalInfo(calories: 150, protein: 6, carbs: 8, fat: 10, sugar: 0, fiber: 0, sodium: 200);
         break;
       case 'Tempura':
-         nutritionalInfo = NutritionalInfo(calories: 200, protein: 8, carbs: 25, fat: 8, sugar: 0, fiber: 0, sodium: 400);
+         nutritionalInfo = NutritionalInfo(calories: 200, protein: 5, carbs: 25, fat: 8, sugar: 0, fiber: 0, sodium: 400);
          break;
       case 'Batagor':
          nutritionalInfo = NutritionalInfo(calories: 380, protein: 14, carbs: 35, fat: 20, sugar: 5, fiber: 2, sodium: 550);
@@ -167,9 +158,8 @@ class _HasilScanScreenState extends State<HasilScanScreen> {
       default:
         nutritionalInfo = NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
     }
-
-        return NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0);
-    }
+    
+    return nutritionalInfo;
   }
 
   // Generate result based on selected food
