@@ -26,7 +26,7 @@ const RESOURCES = {"flutter.js": "4b2350e14c6650ba82871f60906437ea",
 "assets/assets/images/Logo_Fix.png": "e9fd8d412af5c2c7a50e467222af3c8a",
 "assets/assets/images/kamera_rb.png": "c263b54bd5f547a98924d4cb88c75c30",
 "assets/assets/images/menyapa_rb.png": "843cb7e2319f01704ce43ae16214877a",
-"assets/fonts/MaterialIcons-Regular.otf": "fe46a7fae0966031ed07eaf770cb5767",
+"assets/fonts/MaterialIcons-Regular.otf": "e64d78fdce01c07dabcefd35bb6b853b",
 "assets/NOTICES": "70fb5a1a7d13d338e4b4777640fb0db8",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "e986ebe42ef785b27164c36a9abc7818",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
@@ -43,9 +43,9 @@ const RESOURCES = {"flutter.js": "4b2350e14c6650ba82871f60906437ea",
 "canvaskit/canvaskit.js.symbols": "efc2cd87d1ff6c586b7d4c7083063a40",
 "canvaskit/skwasm.js.symbols": "96263e00e3c9bd9cd878ead867c04f3c",
 "favicon.png": "772e902eada0f7516ff79eee59b853df",
-"flutter_bootstrap.js": "6f94fbc867327a5c18d64bac7990701b",
+"flutter_bootstrap.js": "ede20f1a5c4ade00cb8742ba590dfbb6",
 "version.json": "e672cf2f352b6a6fcb5cff31fee93ece",
-"main.dart.js": "1e050b60ca04ca8a5bb855441016f377"};
+"main.dart.js": "e1e8f11c77c3d670c897e8df798c6b5f"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
