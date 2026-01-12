@@ -195,7 +195,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       dailyStatus[i + 1] = DayStatus(
         day: i + 1,
         completed: completed,
-        scanned: dayLogs.isNotEmpty,
+        scanned: dayCandidateLogs.isNotEmpty,
         hasSweetDrink: hasSweetDrink,
       );
 
