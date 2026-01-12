@@ -80,8 +80,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       final isWater = lower.contains('air dan sejenisnya');
       
       final isSweetDrink = lower.contains('es teh') || 
-                           lower.contains('minuman botol') || 
-                           lower.contains('thai tea');
+                           lower.contains('thai tea'); // Removed 'minuman botol' to prevent water bottle false positives
 
       return {
         'date': DateTime.parse(e['eaten_at']).toLocal(),
@@ -99,13 +98,6 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     for (int i = 0; i < 7; i++) {
       final targetDate = startDate.add(Duration(days: i));
       
-      // If targetDate is in future (relative to Now/PauseDate), break or mark pending
-      // If paused, time effectively stops at pauseDate. 
-      // But actually, 'startDate' in my logic is the FIXED start.
-      // If I paused, I should have shifted startDate? 
-      // YES. _resumeChallenge handles shifting.
-      // So here, we just compare against Now.
-      
       // Determine if this day is "Active/Past"
       // Compare Just Dates
       final targetYMD = DateTime(targetDate.year, targetDate.month, targetDate.day);
@@ -118,17 +110,30 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       }
       
       // It's Today or Past. Check Logs.
-      final dayLogs = logs.where((log) {
+      final dayCandidateLogs = logs.where((log) {
         final d = log['date'] as DateTime;
-        // Strict check: Log must be AFTER the challenge start time
-        // This prevents immediate failure loops from past logs (even from earlier today)
-        if (d.isBefore(startDate)) return false; 
-        
         return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
       }).toList();
 
-      final hasSweetDrink = dayLogs.any((l) => l['isSweetDrink'] == true);
-      final hasWater = dayLogs.any((l) => l['isWater'] == true); // "Scan Air"
+      bool hasSweetDrink = false;
+      bool hasWater = false;
+
+      for (final log in dayCandidateLogs) {
+          final d = log['date'] as DateTime;
+          // Strict validity: Log must be AFTER the challenge start time
+          final isStrictlyAfterStart = !d.isBefore(startDate);
+          
+          if (log['isSweetDrink'] == true) {
+             // Sweet Drink MUST be strictly after start to count as Failure (prevents loops)
+             if (isStrictlyAfterStart) hasSweetDrink = true;
+          }
+          
+          if (log['isWater'] == true) {
+             // Water counts even if before start time (as long as it's the same day),
+             // so user doesn't lose credit for a scan if app restarts/resets later that day.
+             hasWater = true;
+          }
+      }
 
       // Fail Condition 1: Sweet Drink
       if (hasSweetDrink) {
