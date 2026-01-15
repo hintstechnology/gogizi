@@ -9,6 +9,7 @@ import '../challenge/challenge_screen.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/profile_service.dart';
+import '../../services/challenge_service.dart'; // Import Service
 import '../profil/profil_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,7 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _challengeKey = GlobalKey();
 
   final ProfileService _profileService = ProfileService();
+  final ChallengeService _challengeService = ChallengeService(); // Initialize Service
+  
   UserProfile? _userProfile;
+  ChallengeStatus _challengeStatus = ChallengeStatus.empty; // Default empty
   bool _isLoading = true;
 
   @override
@@ -35,18 +39,24 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkTutorial();
     });
-    _loadProfile();
+    _loadData(); // Load all data
   }
 
-  Future<void> _loadProfile() async {
+  Future<void> _loadData() async {
     final profile = await _profileService.getUserProfile();
+    final challenge = await _challengeService.getChallengeStatus(); // Fetch real status
+    
     if (mounted) {
       setState(() {
         _userProfile = profile;
+        _challengeStatus = challenge;
         _isLoading = false;
       });
     }
   }
+
+  // Renamed from _loadProfile to match usage
+  Future<void> _loadProfile() => _loadData(); 
 
   Future<void> _checkTutorial() async {
     final prefs = await SharedPreferences.getInstance();
@@ -87,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
              // For now, let's push ProfileScreen directly on top.
              Navigator.of(context).push(
                MaterialPageRoute(builder: (_) => const ProfilScreen()),
-             ).then((_) => _loadProfile()); // Reload after return
+             ).then((_) => _loadData()); // Reload after return
           }
        });
     }
@@ -122,8 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ? profile.nutritionalNeeds 
         : (profile != null && profile.isComplete ? NutritionalNeeds.calculate(profile) : null);
 
-    // Challenge: Use empty/zero for now if no backend
-    final challenge = ChallengeStatus.empty; 
+    // Challenge: Use fetched status
+    final challenge = _challengeStatus; 
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLightOrange,
@@ -317,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const ChallengeScreen()),
-                      );
+                      ).then((_) => _loadData());
                     },
                     borderRadius: BorderRadius.circular(16),
                     child: Padding(
@@ -351,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(builder: (_) => const ChallengeScreen()),
-                                  );
+                                  ).then((_) => _loadData());
                                 },
                                 icon: Icon(
                                   Icons.arrow_forward_ios,
