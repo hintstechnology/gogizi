@@ -55,8 +55,8 @@ class ProfileService {
       
       final profile = UserProfile.fromJson(data);
       
-      // Calculate nutritional needs
-      final needs = NutritionalNeeds.calculate(profile);
+      // Calculate nutritional needs only if profile is complete
+      final needs = profile.isComplete ? NutritionalNeeds.calculate(profile) : null;
       
       return UserProfile(
         id: profile.id,

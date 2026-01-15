@@ -7,6 +7,7 @@ import '../auth/login_screen.dart';
 import '../../services/profile_service.dart';
 import '../../services/recommendation_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -549,6 +550,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
               OutlinedButton.icon(
                 onPressed: () async {
                   await Supabase.instance.client.auth.signOut();
+                  try {
+                    await GoogleSignIn().signOut();
+                  } catch (_) {} // Ignore if not signed in via Google
                   if (context.mounted) {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const LoginScreen()),

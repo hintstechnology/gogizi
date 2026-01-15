@@ -98,39 +98,55 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Fallback for Admin Email Login (manual logic preserved)
-  Future<void> _adminLogin() async {
+  // Handle Login (Admin or Regular)
+  Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      // Special check for Admin Login
-      if (_emailController.text == 'gizigo2026@gmail.com' &&
-          _passwordController.text == 'admin123') {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      // 1. Special check for Admin Login
+      if (email == 'gizigo2026@gmail.com' &&
+          password == 'admin123') {
         
-        // Simulate "logging in" delay
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 1)); // Simulate delay
         
         if (mounted) {
-           setState(() {
-            _isLoading = false;
-          });
-          Navigator.of(context).pushReplacement(
+           setState(() => _isLoading = false);
+           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
           );
         }
         return;
       }
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email atau password salah!')),
+      // 2. Regular User Login via Supabase
+      try {
+        final AuthResponse res = await Supabase.instance.client.auth.signInWithPassword(
+          email: email,
+          password: password,
         );
+
+        if (res.user != null) {
+          if (mounted) {
+             Navigator.of(context).pushReplacement(
+               MaterialPageRoute(builder: (_) => const MainNavigation()),
+             );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Email atau password salah!')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
@@ -256,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Login button (Email/Pass -> Admin Login for testing, or generic login)
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _adminLogin, 
+                  onPressed: _isLoading ? null : _handleLogin, 
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
