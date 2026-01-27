@@ -136,6 +136,15 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            Text(
+              'Funded by AI Grant 2025 Universitas Brawijaya',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.grey,
+                    fontSize: 10,
+                  ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 32),
           ],
         ),
