@@ -12,14 +12,24 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
   
-  // Load Env
-  await dotenv.load(fileName: ".env");
-  
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
+  // 1. Initialize Supabase (CRITICAL: Must be first and hardcoded for safety)
+  try {
+    await Supabase.initialize(
+      url: 'https://rrqqaflkcntczqmwpbxf.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycXFhZmxrY250Y3pxbXdwYnhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwNDc5MjUsImV4cCI6MjA4MjYyMzkyNX0.8BL107ILh4yTzyZxqtUx9BJ0jggahdTD5jCE6XrvNwE',
+    );
+    debugPrint("Supabase initialized successfully.");
+  } catch (e) {
+    debugPrint("CRITICAL: Supabase Initialization Failed: $e");
+  }
+
+  // 2. Load Env (Secondary)
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Warning: Dotenv load failed: $e");
+    // Proceed anyway as we hardcoded critical keys
+  }
 
   runApp(const GoGiziApp());
 }
@@ -53,16 +63,30 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkOnboardingStatus() async {
-    await Future.delayed(const Duration(seconds: 3)); // Increased duration slightly to view logos
+    await Future.delayed(const Duration(seconds: 3)); 
     
     if (!mounted) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-    
-    // Check Supabase Session
-    final session = Supabase.instance.client.auth.currentSession;
-    final isLoggedIn = session != null;
+    bool onboardingCompleted = false;
+    bool isLoggedIn = false;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+      
+      try {
+        // Check Supabase Session safely
+        final session = Supabase.instance.client.auth.currentSession;
+        isLoggedIn = session != null;
+      } catch (e) {
+        debugPrint("Supabase check failed: $e");
+        // Treat as not logged in if Supabase fails (e.g. not initialized)
+        isLoggedIn = false;
+      }
+    } catch (e) {
+      debugPrint("Pre-check failed: $e");
+      // Fallback defaults
+    }
 
     if (!mounted) return;
 

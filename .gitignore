@@ -43,6 +43,10 @@ coverage/
 /android/app/profile
 /android/app/release
 
+# Firebase - jangan di-push ke public repo (contains API keys)
+**/google-services.json
+**/GoogleService-Info.plist
+
 # iOS related
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
