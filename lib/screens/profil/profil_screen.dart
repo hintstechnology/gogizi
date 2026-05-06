@@ -8,6 +8,7 @@ import '../../services/profile_service.dart';
 import '../../services/recommendation_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'about_us_screen.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});
@@ -542,6 +543,24 @@ class _ProfilScreenState extends State<ProfilScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text('Simpan Profil'),
+              ),
+
+              const SizedBox(height: 16),
+
+              // About Us Button
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AboutUsScreen()),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primaryBlue,
+                  side: const BorderSide(color: AppTheme.primaryBlue),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                icon: const Icon(Icons.info_outline),
+                label: const Text('Tentang Kami'),
               ),
 
               const SizedBox(height: 16),
